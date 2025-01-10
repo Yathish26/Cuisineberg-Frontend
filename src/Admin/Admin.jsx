@@ -1,21 +1,54 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Admin() {
-  const navigate = useNavigate()  
+  const [totalretails, setTotalRetails] = useState('')
+  const [totalmenus, setTotalMenus] = useState('')
+  const [allRestaurants, setAllRestaurants] = useState([])
+  const navigate = useNavigate()
 
 
-  useEffect(() => {
+  const fetchserver = async () => {
     const token = localStorage.getItem('admintoken');
     if (!token) {
       navigate('/admin/login');
+      return;
     }
-  })
-  
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/admin`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem('admintoken');
+        navigate('/admin/login');
+        return;
+      }
+
+      const data = await response.json();
+      setTotalRetails(data.totalRestaurants);
+      setTotalMenus(data.totalMenuItems);
+      setAllRestaurants(data.restaurantNames); // Update: Assume data.restaurants is an array of objects with `id` and `name`
+    } catch (error) {
+      console.log('Error fetching data:', error);
+    }
+  };
+
+
+
+  useEffect(() => {
+    fetchserver();
+  }, []);
+
   const handleLogout = () => {
     localStorage.removeItem('admintoken');
     navigate('/admin/login');
-  }
+  };
 
   return (
     <div className="min-h-screen bg-orange-50">
@@ -34,9 +67,11 @@ export default function Admin() {
           <div className="bg-white rounded-lg shadow-md p-6">
             <h2 className="text-xl font-bold text-orange-600 mb-4">Add Restaurant</h2>
             <p className="text-gray-700 mb-4">Register a new restaurant and manage its details.</p>
-            <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition">
-              Add Restaurant
-            </button>
+            <Link to="/admin/addretail">
+              <button className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded transition">
+                Add Restaurant
+              </button>
+            </Link>
           </div>
 
           {/* Reports */}
@@ -45,11 +80,11 @@ export default function Admin() {
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Total Restaurants Registered</span>
-                <span className="text-orange-600 font-bold">45</span>
+                <span className="text-orange-600 font-bold">{totalretails}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Total Menu Inventories</span>
-                <span className="text-orange-600 font-bold">320</span>
+                <span className="text-orange-600 font-bold">{totalmenus}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-700">Total Orders Processed</span>
@@ -69,10 +104,28 @@ export default function Admin() {
         </div>
       </main>
 
+      {/* List of All Restaurants */}
+      <div className="bg-white rounded-lg shadow-md p-6 mt-8">
+        <h2 className="text-2xl font-bold text-orange-600 mb-4 text-center">Restaurants Overview</h2>
+        <ul className="divide-y divide-orange-200">
+          {allRestaurants.map((retail, index) => (
+            <li key={index} className="py-2 flex justify-between items-center hover:bg-orange-50 transition-colors">
+              <span className="text-gray-700">{retail.name}</span> {/* Display restaurant name */}
+              <Link
+                to={`/admin/retail/${retail.id}`} // Navigate to /admin/retail/:id
+                className="text-sm text-orange-500 hover:underline"
+              >
+                Details
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
       {/* Footer */}
       <footer className="bg-orange-600 text-white py-4 mt-8">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-sm">© 2025 Cuisineberg. All rights reserved.</p>
+          <p className="text-sm">  {new Date().getFullYear()} Cuisineberg. All rights reserved.</p>
         </div>
       </footer>
     </div>

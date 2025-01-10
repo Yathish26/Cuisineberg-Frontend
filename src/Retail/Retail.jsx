@@ -36,7 +36,7 @@ export default function Retail() {
   const fetchRestaurantData = async () => {
     try {
       const token = localStorage.getItem('retailtoken');
-      const response = await fetch('http://localhost:5000/api/cuisineberg/retail/info', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/info`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function Retail() {
       const token = localStorage.getItem('retailtoken');
       const email = restaurantInfo.email;
 
-      const response = await fetch('http://localhost:5000/api/cuisineberg/restaurant/addmenu', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/restaurant/addmenu`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function Retail() {
 
     try {
       const token = localStorage.getItem('retailtoken');
-      const response = await fetch(`http://localhost:5000/api/cuisineberg/restaurant/menu/${editingItem._id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/restaurant/menu/${editingItem._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ export default function Retail() {
     console.log('Deleting item with ID:', deletingItemId); // Debugging log to verify deletingItemId
     try {
       const token = localStorage.getItem('retailtoken');
-      const response = await fetch(`http://localhost:5000/api/cuisineberg/restaurant/menu/${deletingItemId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/restaurant/menu/${deletingItemId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

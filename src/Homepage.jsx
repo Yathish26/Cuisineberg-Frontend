@@ -30,7 +30,7 @@ export default function Homepage() {
         className="bg-cover bg-center h-[80vh] flex items-center justify-center relative"
         style={{ backgroundImage: 'url(https://blog.foodhub.com/wp-content/uploads/2024/07/Indian-cuisine.jpg)' }}
       >
-        <div className="absolute inset-0 bg-gradient-to-t from-orange-900 via-orange-600 to-transparent opacity-80"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-900 via-orange-600 to-transparent opacity-60"></div>
         <div className="relative text-center text-white px-4 py-8">
           <h2 className="text-5xl font-bold mb-4">Welcome to Cuisineberg</h2>
           <p className="text-lg mb-6">Fresh and delicious meals delivered to your doorstep in minutes!</p>

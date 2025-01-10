@@ -17,7 +17,7 @@ export default function AdminLogin() {
         };
 
         try {
-            const response = await fetch('http://localhost:5000/api/cuisineberg/admin/login', {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/admin/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export default function AdminLogin() {
 
             const result = await response.json();
             localStorage.setItem('admintoken', result.token);
-            navigate('/admin/dashboard');
+            navigate('/admin');
         } catch (error) {
             setMessage('Failed to Login')
             setTimeout(() => {

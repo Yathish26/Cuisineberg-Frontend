@@ -19,7 +19,7 @@ export default function RetailEdit() {
   useEffect(() => {
     const fetchRestaurantInfo = async () => {
       const token = localStorage.getItem("retailtoken");
-      const response = await fetch("http://localhost:5000/api/cuisineberg/retail/info", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/info`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -60,7 +60,7 @@ export default function RetailEdit() {
     try {
       const token = localStorage.getItem("retailtoken");
 
-      const response = await fetch("http://localhost:5000/api/cuisineberg/retail/info", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/info`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
