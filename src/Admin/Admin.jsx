@@ -33,7 +33,7 @@ export default function Admin() {
       const data = await response.json();
       setTotalRetails(data.totalRestaurants);
       setTotalMenus(data.totalMenuItems);
-      setAllRestaurants(data.restaurantNames); // Update: Assume data.restaurants is an array of objects with `id` and `name`
+      setAllRestaurants(data.restaurantNames);
     } catch (error) {
       console.log('Error fetching data:', error);
     }

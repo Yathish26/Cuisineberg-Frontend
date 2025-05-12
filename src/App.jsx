@@ -11,6 +11,8 @@ import RetailEdit from "./Retail/RetailEdit";
 import AdminLogin from "./Admin/AdminLogin";
 import AddRetail from "./Admin/Addretail";
 import RetailAdmin from "./Admin/AdminRetail";
+import Order from "./Order";
+import UserOrder from "./UserOrder";
 
 function App() {
 
@@ -21,6 +23,8 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/order" element={<Order />} />
+          <Route path="/order/:slug" element={<UserOrder />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/admin/login' element={<AdminLogin />} />
           <Route path='/admin/addretail' element={<AddRetail />} />

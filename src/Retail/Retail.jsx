@@ -105,11 +105,12 @@ export default function Retail() {
           ...prevState,
           menu: [...prevState.menu, addedItem], // Add the new item to the menu
         }));
-        setIsItemAdded(true); // Show success message
+        setIsItemAdded(true);
         setTimeout(() => {
           setIsItemAdded(false);
-          setIsAddItemModalOpen(false); // Close modal after 3 seconds
-        }, 3000);
+          setIsAddItemModalOpen(false);
+          setNewItem({ itemName: '', price: '' });
+        }, 1000);
       } else {
         alert('Failed to add item');
       }
@@ -118,6 +119,11 @@ export default function Retail() {
       alert('An error occurred while adding the item');
     }
   };
+
+  const handleCancelAddItem = () => {
+    setIsAddItemModalOpen(false);
+    setNewItem({ itemName: '', price: '' });
+  }
 
   const handleEditItem = (item) => {
     setEditingItem(item);
@@ -154,16 +160,17 @@ export default function Retail() {
 
       if (response.ok) {
         const updatedItem = await response.json();
-        console.log('Updated item:', updatedItem);  // Debugging log
-        setRestaurantInfo((prevState) => ({
+        setRestaurantInfo(prevState => ({
           ...prevState,
-          menu: prevState.menu.map((item) =>
-            item._id === updatedItem._id ? updatedItem : item
+          menu: prevState.menu.map(item =>
+            item._id === updatedItem._id ? { ...item, ...updatedItem } : item
           ),
         }));
-        setIsEditing(false); // Close editing mode
-        setEditItemName('');  // Reset the item name
-        setEditItemPrice(''); // Reset the price
+        setIsEditing(false);
+        setEditingItem(null);
+        setEditItemName('');
+        setEditItemPrice('');
+        fetchRestaurantData();
       } else {
         alert('Failed to update item');
       }
@@ -313,7 +320,7 @@ export default function Retail() {
                 Add Item
               </button>
               <button
-                onClick={() => setIsAddItemModalOpen(false)}
+                onClick={handleCancelAddItem}
                 className="ml-4 bg-gray-300 text-black py-2 px-4 rounded transition"
               >
                 Cancel
