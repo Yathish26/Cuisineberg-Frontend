@@ -50,7 +50,7 @@ Cuisineberg is an innovative food delivery application designed to connect food 
 
 4. Open your browser and navigate to:
    ```
-   http://localhost:5173
+   https://cuisineberg.vercel.app
    ```
 
 ## Usage

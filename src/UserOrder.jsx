@@ -12,7 +12,7 @@ export default function UserOrder() {
     useEffect(() => {
         const fetchRestaurant = async () => {
             try {
-                const res = await axios.get('http://localhost:5000/api/cuisineberg/business/public', {
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/cuisineberg/business/public`, {
                     headers: {
                         'x-pub-key': publicCode,
                     },
