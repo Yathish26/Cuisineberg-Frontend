@@ -36,12 +36,13 @@ export default function RetailRegister() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-rose-50">
-            <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold text-red-600 mb-6 text-center">Retail Registration</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-rose-50 to-white">
+            <div className="max-w-md w-full bg-white/90 p-8 rounded-2xl shadow-2xl border border-rose-100">
+                <h2 className="text-3xl font-extrabold text-rose-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
+                <p className="text-center text-gray-500 mb-6">Join Cuisineberg and grow your business</p>
 
                 {message && (
-                    <div className={`mb-4 text-center text-sm ${message.includes('Error') ? 'text-red-500' : 'text-green-600'}`}>
+                    <div className={`mb-4 text-center text-sm px-4 py-2 rounded-lg ${message.includes('Error') ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
                         {message}
                     </div>
                 )}
@@ -49,55 +50,81 @@ export default function RetailRegister() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {['name', 'email', 'password', 'restaurantName'].map(field => (
                         <div key={field}>
-                            <label htmlFor={field} className={labelClass}>{field === 'restaurantName' ? 'Restaurant Name' : field.charAt(0).toUpperCase() + field.slice(1)}</label>
+                            <label htmlFor={field} className={labelClass}>
+                                {field === 'restaurantName' ? 'Restaurant Name' : field.charAt(0).toUpperCase() + field.slice(1)}
+                            </label>
                             <input
                                 type={field === 'email' ? 'email' : field === 'password' ? 'password' : 'text'}
                                 id={field}
                                 name={field}
+                                autoComplete={field}
                                 value={formData[field]}
                                 onChange={handleChange}
-                                className={inputClass}
+                                className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
                                 required
+                                placeholder={
+                                    field === 'name' ? 'Your Name' :
+                                    field === 'email' ? 'you@email.com' :
+                                    field === 'password' ? 'Password' :
+                                    'Restaurant Name'
+                                }
                             />
                         </div>
                     ))}
 
-                    {['street', 'city', 'state', 'zipCode', 'country'].map(field => (
-                        <div key={field}>
-                            <label htmlFor={field} className={labelClass}>{field.charAt(0).toUpperCase() + field.slice(1)}</label>
-                            <input
-                                type="text"
-                                id={field}
-                                name={field}
-                                value={formData.restaurantAddress[field]}
-                                onChange={handleChange}
-                                className={inputClass}
-                                required
-                            />
-                        </div>
-                    ))}
+                    <div className="grid grid-cols-2 gap-4">
+                        {['street', 'city', 'state', 'zipCode', 'country'].map((field, idx) => (
+                            <div key={field} className={idx < 2 ? "col-span-2" : ""}>
+                                <label htmlFor={field} className={labelClass}>
+                                    {field === 'zipCode' ? 'ZIP Code' : field.charAt(0).toUpperCase() + field.slice(1)}
+                                </label>
+                                <input
+                                    type="text"
+                                    id={field}
+                                    name={field}
+                                    autoComplete={field}
+                                    value={formData.restaurantAddress[field]}
+                                    onChange={handleChange}
+                                    className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
+                                    required
+                                    placeholder={
+                                        field === 'street' ? 'Street Address' :
+                                        field === 'city' ? 'City' :
+                                        field === 'state' ? 'State' :
+                                        field === 'zipCode' ? 'ZIP Code' :
+                                        'Country'
+                                    }
+                                />
+                            </div>
+                        ))}
+                    </div>
 
                     <div>
                         <label htmlFor="mobileNumber" className={labelClass}>Mobile Number</label>
                         <input
-                            type="text"
+                            type="tel"
                             id="mobileNumber"
                             name="mobileNumber"
+                            autoComplete="tel"
                             value={formData.mobileNumber}
                             onChange={handleChange}
-                            className={inputClass}
+                            className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
                             required
+                            placeholder="e.g. +1 234 567 8901"
                         />
                     </div>
 
-                    <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition duration-300">
+                    <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition duration-300 mt-2"
+                    >
                         Register
                     </button>
                 </form>
 
-                <p className="mt-4 text-sm text-gray-600 text-center">
+                <p className="mt-6 text-sm text-gray-600 text-center">
                     Already have an account?{' '}
-                    <Link to="/retail/login" className="text-red-600 hover:underline">Login</Link>
+                    <Link to="/retail/login" className="text-rose-600 font-medium hover:underline">Login</Link>
                 </p>
             </div>
         </div>

@@ -62,68 +62,76 @@ export default function UserOrder() {
     }
 
     return (
-        <div className="min-h-screen bg-[#fffbea] text-red-900 px-4 py-8">
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-yellow-50 to-white text-red-900 px-2 sm:px-4 py-6">
             <div
-                className="max-w-3xl mx-auto bg-white shadow-lg rounded-xl p-6 border border-red-200"
-                style={{ marginBottom: cart.length === 0 ? '0px' : `${208 + cart.length * 30}px` }}
+                className="max-w-2xl mx-auto bg-white shadow-2xl rounded-3xl p-4 sm:p-8 border border-red-100 relative"
+                style={{ marginBottom: cart.length === 0 ? '0px' : `${180 + cart.length * 24}px` }}
             >
-                <h1 className="text-3xl font-bold text-red-700 mb-4">{restaurant.restaurantName}</h1>
-                <p className="text-md mb-6 text-red-800">
-                    📍 {restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}, {restaurant.restaurantAddress?.state} - {restaurant.restaurantAddress?.zipCode}
-                </p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+                    <div>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-red-700 mb-1">{restaurant.restaurantName}</h1>
+                        <p className="text-sm sm:text-base text-red-700 flex items-center gap-1">
+                            <span className="inline-block text-lg">📍</span>
+                            <span>
+                                {restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}, {restaurant.restaurantAddress?.state} - {restaurant.restaurantAddress?.zipCode}
+                            </span>
+                        </p>
+                    </div>
+                </div>
 
-                <h2 className="text-2xl font-semibold text-red-600 mb-4">Menu</h2>
-                <div className="space-y-4">
+                <h2 className="text-xl sm:text-2xl font-semibold text-red-600 mb-3">Menu</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {restaurant.menu.map((item) => (
-                        <div key={item._id} className="flex justify-between items-center bg-red-50 px-4 py-2 rounded-lg border border-red-200 shadow-sm">
+                        <div key={item._id} className="flex flex-col justify-between bg-red-50 px-4 py-3 rounded-2xl border border-red-100 shadow hover:shadow-md transition">
                             <div>
-                                <p className="text-lg font-medium text-red-800">{item.itemName}</p>
-                                <p className="text-sm text-red-600">₹ {item.price}</p>
+                                <p className="text-base sm:text-lg font-medium text-red-800">{item.itemName}</p>
+                                <p className="text-xs sm:text-sm text-red-600 mt-1">₹ {item.price}</p>
                             </div>
-                            <svg
+                            <button
                                 onClick={() => addToCart(item)}
-                                className='cursor-pointer'
-                                xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none">
-                                <path fillRule="evenodd" clipRule="evenodd" d="M12 1.25C6.06 1.25 1.25 6.06 1.25 12S6.06 22.75 12 22.75 22.75 17.94 22.75 12 17.94 1.25 12 1.25ZM13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z" fill="#b91c1c" />
-                            </svg>
+                                className="mt-3 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 rounded-xl transition text-sm shadow"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                    <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z"/>
+                                </svg>
+                                Add
+                            </button>
                         </div>
                     ))}
                 </div>
 
                 {cart.length > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] border-t border-red-300 z-50 p-4 rounded-t-2xl transition-all duration-300 transform translate-y-0">
-                        <h3 className="text-xl font-bold text-red-700 mb-4">Your Order</h3>
-                        <ul className="space-y-2 mb-4 max-h-40 overflow-y-auto pr-2">
+                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(185,28,28,0.10)] border-t border-red-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md mx-auto">
+                        <h3 className="text-lg sm:text-xl font-bold text-red-700 mb-3">Your Order</h3>
+                        <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
                             {cart.map((item) => (
-                                <li key={item._id} className="flex justify-between items-center">
-                                    <span>{item.itemName} x {item.quantity}</span>
-                                    <div className="flex items-center gap-3">
-                                        <span>₹ {item.price * item.quantity}</span>
-                                        <svg
+                                <li key={item._id} className="flex justify-between items-center text-sm sm:text-base">
+                                    <span className="truncate">{item.itemName} <span className="font-semibold text-red-700">x {item.quantity}</span></span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">₹ {item.price * item.quantity}</span>
+                                        <button
                                             onClick={() => removeFromCart(item._id)}
-                                            className='cursor-pointer'
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            width="24" height="24"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
+                                            className="p-1 rounded-full hover:bg-red-100 transition"
+                                            aria-label="Remove"
                                         >
-                                            <path d="M16 12H8" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                            <circle cx="12" cy="12" r="10" stroke="#b91c1c" strokeWidth="2" strokeLinejoin="round" />
-                                        </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" stroke="#b91c1c" strokeWidth="2" />
+                                                <path d="M16 12H8" stroke="#b91c1c" strokeWidth="2" strokeLinecap="round" />
+                                            </svg>
+                                        </button>
                                     </div>
                                 </li>
                             ))}
                         </ul>
-                        <div className="flex justify-between font-semibold text-lg text-red-800 mb-4">
+                        <div className="flex justify-between font-semibold text-base sm:text-lg text-red-800 mb-3">
                             <span>Total</span>
                             <span>₹ {totalAmount}</span>
                         </div>
-                        <button className="w-full bg-red-700 hover:bg-red-800 text-white py-2 rounded-xl text-lg transition">
+                        <button className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2 rounded-xl text-base sm:text-lg font-bold shadow transition">
                             Order Now
                         </button>
                     </div>
                 )}
-
             </div>
         </div>
     );

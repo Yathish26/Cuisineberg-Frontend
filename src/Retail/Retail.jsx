@@ -217,27 +217,27 @@ export default function Retail() {
   };
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
       {/* Restaurant Info */}
-      <header className="bg-orange-600 text-white py-4 px-6 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
+      <header className="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-6 px-8 shadow-lg rounded-b-3xl">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold">{restaurantInfo.restaurantName || 'Restaurant Name'}</h1>
-            <p className="text-sm">
-              Location: {restaurantInfo.restaurantAddress?.street || 'Street'}, {restaurantInfo.restaurantAddress?.city || 'City'}, {restaurantInfo.restaurantAddress?.state || "State"} - {restaurantInfo.restaurantAddress?.zipCode || "Zipcode"}
+            <h1 className="text-4xl font-bold tracking-tight mb-1">{restaurantInfo.restaurantName || 'Restaurant Name'}</h1>
+            <p className="text-base opacity-90">
+              <span className="font-semibold">Location:</span> {restaurantInfo.restaurantAddress?.street || 'Street'}, {restaurantInfo.restaurantAddress?.city || 'City'}, {restaurantInfo.restaurantAddress?.state || "State"} - {restaurantInfo.restaurantAddress?.zipCode || "Zipcode"}
             </p>
-            <p className="text-sm">Contact: {restaurantInfo.mobileNumber || '+123-456-7890'}</p>
+            <p className="text-base opacity-90"><span className="font-semibold">Contact:</span> {restaurantInfo.mobileNumber || '+123-456-7890'}</p>
           </div>
-          <div className='flex gap-2'>
+          <div className='flex gap-3'>
             <button
               onClick={() => navigate('/retail/edit')}
-              className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition"
+              className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200 backdrop-blur"
             >
               Edit Info
             </button>
             <button
               onClick={handleLogout}
-              className="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition"
+              className="bg-white/20 hover:bg-red-500/80 text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200 backdrop-blur"
             >
               Logout
             </button>
@@ -245,143 +245,160 @@ export default function Retail() {
         </div>
       </header>
 
-      <section className="bg-white w-fit mx-4 my-2 rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-orange-600 mb-4">Total Menu Items</h2>
-        <p className="text-4xl font-bold text-gray-700">{restaurantInfo.menu.length}</p>
+      <section className="bg-white/80 w-fit mx-4 my-6 rounded-2xl shadow-lg p-8 border border-orange-100">
+        <h2 className="text-2xl font-bold text-orange-600 mb-2">Total Menu Items</h2>
+        <p className="text-5xl font-bold text-gray-800">{restaurantInfo.menu.length}</p>
       </section>
 
-      <main className="container mx-auto px-4 py-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <main className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-10">
         {/* Menu Section */}
-        <section className="bg-white rounded-lg shadow-md p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-orange-600 mb-4">Menu</h2>
-            <button onClick={() => setEditButton(!editButton)} className={`${editButton ? 'bg-green-500 hover:bg-green-700' : 'bg-orange-500 hover:bg-orange-700'}  text-white font-bold py-2 px-4 rounded transition`}>
-              Edit Menu
+        <section className="bg-white/90 rounded-2xl shadow-xl p-8 border border-orange-100">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-orange-600">Menu</h2>
+            <button
+              onClick={() => setEditButton(!editButton)}
+              className={`${
+                editButton
+                  ? 'bg-green-500 hover:bg-green-600'
+                  : 'bg-orange-500 hover:bg-orange-600'
+              } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
+            >
+              {editButton ? "Done" : "Edit Menu"}
             </button>
           </div>
           <ul className="space-y-4">
             {restaurantInfo.menu.length > 0 ? (
               restaurantInfo.menu.map((item) => (
-                <li key={item._id} className="flex justify-between items-center py-2 border-b border-gray-200">
-                  <span className="text-gray-700 font-medium flex-1">{item.itemName}</span>
-                  <span className="text-gray-600 w-1/4">{`₹ ${item.price.toFixed(2)}`}</span>
-                  {editButton &&
-                    <div className="flex gap-2">
+                <li
+                  key={item._id}
+                  className="flex justify-between items-center py-3 px-4 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow-sm transition"
+                >
+                  <span className="text-gray-800 font-medium flex-1">{item.itemName}</span>
+                  <span className="text-orange-700 font-semibold w-1/4 text-right">{`₹ ${item.price.toFixed(2)}`}</span>
+                  {editButton && (
+                    <div className="flex gap-2 ml-4">
                       <button
                         onClick={() => handleEditItem(item)}
-                        className="bg-blue-500 text-white font-bold py-2 px-4 rounded"
+                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-4 rounded-lg shadow transition"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => { setIsDeleting(true); setDeletingItemId(item._id); }}
-                        className="bg-red-500 text-white font-bold py-2 px-4 rounded"
+                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-4 rounded-lg shadow transition"
                       >
                         Delete
                       </button>
-                    </div>}
+                    </div>
+                  )}
                 </li>
               ))
             ) : (
-              <li className="text-gray-500">No menu items available</li>
+              <li className="text-gray-400 text-center py-8">No menu items available</li>
             )}
           </ul>
           <button
             onClick={() => setIsAddItemModalOpen(true)}
-            className="mt-6 w-full bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded transition"
+            className="mt-8 w-full bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all duration-200"
           >
-            Add Item
+            + Add Item
           </button>
         </section>
 
         {/* Add Item Modal */}
         {isAddItemModalOpen && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
-              <h2 className="text-xl font-bold text-orange-600 mb-4">Add Menu Item</h2>
+          <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
+              <h2 className="text-2xl font-bold text-orange-600 mb-6">Add Menu Item</h2>
               <input
                 type="text"
                 placeholder="Item Name"
                 value={newItem.itemName}
                 onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded mb-4"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="number"
                 placeholder="Price"
                 value={newItem.price}
                 onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                className="w-full p-2 border border-gray-300 rounded mb-4"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
-              <button
-                onClick={handleAddItem}
-                className="bg-orange-500 text-white py-2 px-4 rounded transition"
-              >
-                Add Item
-              </button>
-              <button
-                onClick={handleCancelAddItem}
-                className="ml-4 bg-gray-300 text-black py-2 px-4 rounded transition"
-              >
-                Cancel
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleAddItem}
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Add Item
+                </button>
+                <button
+                  onClick={handleCancelAddItem}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Edit Item Modal */}
         {isEditing && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
-              <h2 className="text-xl font-bold text-orange-600 mb-4">Edit Menu Item</h2>
+          <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
+              <h2 className="text-2xl font-bold text-orange-600 mb-6">Edit Menu Item</h2>
               <input
                 type="text"
                 placeholder="Item Name"
                 value={editItemName}
                 onChange={(e) => setEditItemName(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mb-4"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <input
                 type="number"
                 placeholder="Price"
                 value={editItemPrice}
                 onChange={(e) => setEditItemPrice(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded mb-4"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
-              <button
-                onClick={handleSaveEdit}
-                className="bg-blue-500 text-white py-2 px-4 rounded transition"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="ml-4 bg-gray-300 text-black py-2 px-4 rounded transition"
-              >
-                Cancel
-              </button>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleSaveEdit}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
 
         {/* Delete Confirmation */}
         {isDeleting && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-1/3">
-              <h2 className="text-xl font-bold text-orange-600 mb-4">Delete Menu Item</h2>
-              <p>Are you sure you want to delete this item?</p>
-              <button
-                onClick={handleDeleteItem}
-                className="bg-red-500 text-white py-2 px-4 rounded transition"
-              >
-                Delete
-              </button>
-              <button
-                onClick={() => setIsDeleting(false)}
-                className="ml-4 bg-gray-300 text-black py-2 px-4 rounded transition"
-              >
-                Cancel
-              </button>
+          <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
+              <h2 className="text-2xl font-bold text-orange-600 mb-4">Delete Menu Item</h2>
+              <p className="mb-6 text-gray-700">Are you sure you want to delete this item?</p>
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={handleDeleteItem}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Delete
+                </button>
+                <button
+                  onClick={() => setIsDeleting(false)}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow transition"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -389,7 +406,7 @@ export default function Retail() {
 
       {/* Success Confirmation */}
       {isItemAdded && (
-        <div className="fixed bottom-4 left-4 bg-green-500 text-white py-2 px-4 rounded">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white py-3 px-8 rounded-xl shadow-lg text-lg font-semibold z-50 animate-bounce">
           Item added successfully!
         </div>
       )}
