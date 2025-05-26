@@ -18,7 +18,7 @@ export default function Retail() {
 
   const [orders, setOrders] = useState([]);
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
-  const [newItem, setNewItem] = useState({ itemName: '', price: '' });
+  const [newItem, setNewItem] = useState({ itemName: '', price: '', photoURL: '' });
   const [isItemAdded, setIsItemAdded] = useState(false);
 
   const [isEditing, setIsEditing] = useState(false); // For edit mode
@@ -34,9 +34,9 @@ export default function Retail() {
 
   const navigate = useNavigate();
 
-  useEffect(()=>{
+  useEffect(() => {
     const token = localStorage.getItem('retailtoken');
-    if(!token){
+    if (!token) {
       navigate('/retail/login');
     }
   }, [navigate]);
@@ -104,21 +104,22 @@ export default function Retail() {
           email: email,
           itemName: newItem.itemName,
           price: price,
+          photoURL: newItem.photoURL || '',
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        const addedItem = data.menu[data.menu.length - 1]; // Assuming the response contains updated menu
+        const addedItem = data.menu[data.menu.length - 1];
         setRestaurantInfo((prevState) => ({
           ...prevState,
-          menu: [...prevState.menu, addedItem], // Add the new item to the menu
+          menu: [...prevState.menu, addedItem],
         }));
         setIsItemAdded(true);
         setTimeout(() => {
           setIsItemAdded(false);
           setIsAddItemModalOpen(false);
-          setNewItem({ itemName: '', price: '' });
+          setNewItem({ itemName: '', price: '', photoURL: '' });
         }, 1000);
       } else {
         alert('Failed to add item');
@@ -138,7 +139,7 @@ export default function Retail() {
     setEditingItem(item);
     setEditItemName(item.itemName);
     setEditItemPrice(item.price);
-    setEditItemPhoto(item.photoURL);
+    setEditItemPhoto(item.photoURL || '');
     setIsEditing(true);
   };
 
@@ -165,6 +166,7 @@ export default function Retail() {
         body: JSON.stringify({
           itemName: editItemName,
           price: price,
+          photoURL: editItemPhoto || '',
         }),
       });
 
@@ -269,8 +271,8 @@ export default function Retail() {
             <button
               onClick={() => setEditButton(!editButton)}
               className={`${editButton
-                  ? 'bg-green-500 hover:bg-green-600'
-                  : 'bg-orange-500 hover:bg-orange-600'
+                ? 'bg-green-500 hover:bg-green-600'
+                : 'bg-orange-500 hover:bg-orange-600'
                 } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
             >
               {editButton ? "Done" : "Edit Menu"}
@@ -281,26 +283,44 @@ export default function Retail() {
               restaurantInfo.menu.map((item) => (
                 <li
                   key={item._id}
-                  className="flex justify-between items-center py-3 px-4 rounded-lg bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow-sm transition"
+                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow transition"
                 >
-                  <span className="text-gray-800 font-medium flex-1">{item.itemName}</span>
-                  <span className="text-orange-700 font-semibold w-1/4 text-right">{`₹ ${item.price.toFixed(2)}`}</span>
-                  {editButton && (
-                    <div className="flex gap-2 ml-4">
-                      <button
-                        onClick={() => handleEditItem(item)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-4 rounded-lg shadow transition"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => { setIsDeleting(true); setDeletingItemId(item._id); }}
-                        className="bg-red-500 hover:bg-red-600 text-white font-semibold py-1 px-4 rounded-lg shadow transition"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                  {item.photoURL && (
+                    <img
+                      src={item.photoURL}
+                      alt={item.itemName}
+                      className="w-full sm:w-16 h-40 sm:h-16 object-cover rounded-lg"
+                    />
                   )}
+
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between w-full gap-2">
+                    <span className="text-gray-900 text-lg font-semibold flex-1">
+                      {item.itemName}
+                    </span>
+                    <span className="text-orange-700 font-bold text-right sm:text-left">
+                      ₹ {item.price.toFixed(2)}
+                    </span>
+
+                    {editButton && (
+                      <div className="flex gap-2 justify-end sm:ml-4 mt-2 sm:mt-0">
+                        <button
+                          onClick={() => handleEditItem(item)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1.5 px-4 rounded-lg shadow transition"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsDeleting(true);
+                            setDeletingItemId(item._id);
+                          }}
+                          className="bg-red-500 hover:bg-red-600 text-white font-medium py-1.5 px-4 rounded-lg shadow transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </li>
               ))
             ) : (
