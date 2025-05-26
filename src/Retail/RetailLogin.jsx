@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function RetailLogin() {
@@ -6,18 +6,39 @@ export default function RetailLogin() {
   const [message, setMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  useEffect(() => {
+    const token = localStorage.getItem('retailtoken');
+    if (token) {
+      navigate('/retail/dashboard');
+    }
+  }, [navigate]);
+
+   const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData),
-    });
-    const data = await res.json();
-    res.ok ? (localStorage.setItem('retailtoken', data.token), navigate('/retail/dashboard')) 
-           : setMessage('Error: ' + data.error);
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.token) {
+        localStorage.setItem('retailtoken', data.token);
+        navigate('/retail/dashboard');
+      } else {
+        throw new Error(data.error || 'Login failed');
+      }
+    } catch (err) {
+      localStorage.removeItem('retailtoken');
+      setMessage('Error: ' + err.message);
+      setTimeout(() => setMessage(''), 2000);
+    }
   };
 
   return (

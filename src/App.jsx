@@ -13,6 +13,7 @@ import AddRetail from "./Admin/Addretail";
 import RetailAdmin from "./Admin/AdminRetail";
 import Order from "./Order";
 import UserOrder from "./UserOrder";
+import Works from "./Works";
 
 function App() {
 
@@ -21,6 +22,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Homepage />} />
+          <Route path="/howitworks" element={<Works />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/order" element={<Order />} />

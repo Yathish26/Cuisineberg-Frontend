@@ -8,6 +8,7 @@ export default function UserOrder() {
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState([]);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         const fetchRestaurant = async () => {
@@ -53,51 +54,74 @@ export default function UserOrder() {
 
     const totalAmount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
 
-    if (loading) {
-        return <div className="text-center py-10 text-lg text-red-500">Loading restaurant info...</div>;
-    }
+    if (loading) return <div className="text-center py-10 text-lg text-red-500 animate-pulse">Loading restaurant info...</div>;
+    if (!restaurant) return <div className="text-center py-10 text-lg text-red-600">Restaurant not found.</div>;
 
-    if (!restaurant) {
-        return <div className="text-center py-10 text-lg text-red-600">Restaurant not found.</div>;
-    }
+    const filteredMenu = restaurant.menu.filter(item =>
+        item.itemName.toLowerCase().includes(search.toLowerCase())
+    );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-red-50 via-yellow-50 to-white text-red-900 px-2 sm:px-4 py-6">
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-yellow-50 to-white text-red-900 px-4 py-6">
             <div
-                className="max-w-2xl mx-auto bg-white shadow-2xl rounded-3xl p-4 sm:p-8 border border-red-100 relative"
+                className="max-w-2xl mx-auto bg-white shadow-xl rounded-3xl p-4 sm:p-6 border border-red-100 relative"
                 style={{ marginBottom: cart.length === 0 ? '0px' : `${180 + cart.length * 24}px` }}
             >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-red-700 mb-1">{restaurant.restaurantName}</h1>
                         <p className="text-sm sm:text-base text-red-700 flex items-center gap-1">
                             <span className="inline-block text-lg">📍</span>
-                            <span>
-                                {restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}, {restaurant.restaurantAddress?.state} - {restaurant.restaurantAddress?.zipCode}
-                            </span>
+                            <span>{restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}, {restaurant.restaurantAddress?.state} - {restaurant.restaurantAddress?.zipCode}</span>
                         </p>
                     </div>
                 </div>
 
+                <input
+                    type="text"
+                    placeholder="Search dishes..."
+                    className="w-full mb-4 px-4 py-2 border border-red-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 text-sm"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                />
+
                 <h2 className="text-xl sm:text-2xl font-semibold text-red-600 mb-3">Menu</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {restaurant.menu.map((item) => (
-                        <div key={item._id} className="flex flex-col justify-between bg-red-50 px-4 py-3 rounded-2xl border border-red-100 shadow hover:shadow-md transition">
-                            <div>
-                                <p className="text-base sm:text-lg font-medium text-red-800">{item.itemName}</p>
-                                <p className="text-xs sm:text-sm text-red-600 mt-1">₹ {item.price}</p>
+                    {filteredMenu.length > 0 ? filteredMenu.map((item) => (
+                        <div
+                            key={item._id}
+                            className="flex flex-row sm:flex-col w-full justify-between bg-red-50 p-3 rounded-2xl border border-red-100 shadow hover:shadow-md transition gap-3"
+                        >
+                            {item.photoURL && (
+                                <img
+                                    src={item.photoURL}
+                                    alt={item.itemName}
+                                    className="w-32 h-32 sm:w-full sm:h-36 object-cover rounded-xl bg-white"
+                                />
+                            )}
+
+                            <div className="flex flex-col justify-between w-full">
+                                <div>
+                                    <p className="text-base sm:text-lg font-medium text-red-800">{item.itemName}</p>
+                                    <p className="text-xs sm:text-sm text-red-600 mt-1">₹ {item.price}</p>
+                                </div>
+
+                                <button
+                                    onClick={() => addToCart(item)}
+                                    className="mt-3 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-3 rounded-xl transition text-sm shadow"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                        <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z" />
+                                    </svg>
+                                    Add
+                                </button>
                             </div>
-                            <button
-                                onClick={() => addToCart(item)}
-                                className="mt-3 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 rounded-xl transition text-sm shadow"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                    <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z"/>
-                                </svg>
-                                Add
-                            </button>
                         </div>
-                    ))}
+
+
+                    )) : (
+                        <p className="text-center col-span-2 text-sm text-red-500">No items match your search.</p>
+                    )}
                 </div>
 
                 {cart.length > 0 && (

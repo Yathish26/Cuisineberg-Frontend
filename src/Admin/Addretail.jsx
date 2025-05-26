@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function AddRetail() {
   const [formData, setFormData] = useState({
@@ -60,102 +60,139 @@ export default function AddRetail() {
   };
 
   return (
-    <div className="max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-center text-orange-500 mb-6">Register Retail</h2>
-      {message && <p className="text-green-600 text-center mb-4">{message}</p>}
-      {error && <p className="text-red-600 text-center mb-4">{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="retailName" className="block text-gray-700 font-medium mb-2">Retail Name</label>
-          <input
-            type="text"
-            id="retailName"
-            name="retailName"
-            value={formData.retailName}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="streetAddress" className="block text-gray-700 font-medium mb-2">Street Address</label>
-          <input
-            type="text"
-            id="streetAddress"
-            name="streetAddress"
-            value={formData.streetAddress}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="city" className="block text-gray-700 font-medium mb-2">City</label>
-          <input
-            type="text"
-            id="city"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="state" className="block text-gray-700 font-medium mb-2">State</label>
-          <input
-            type="text"
-            id="state"
-            name="state"
-            value={formData.state}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="zipCode" className="block text-gray-700 font-medium mb-2">Zip Code</label>
-          <input
-            type="text"
-            id="zipCode"
-            name="zipCode"
-            value={formData.zipCode}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="country" className="block text-gray-700 font-medium mb-2">Country</label>
-          <input
-            type="text"
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="mobileNumber" className="block text-gray-700 font-medium mb-2">Mobile Number</label>
-          <input
-            type="text"
-            id="mobileNumber"
-            name="mobileNumber"
-            value={formData.mobileNumber}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full py-2 px-4 bg-orange-500 text-white font-semibold rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-        >
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-orange-100 py-8 px-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-8">
+        <h2 className="text-3xl font-bold text-center text-orange-600 mb-8 tracking-tight">
           Register Retail
-        </button>
-      </form>
+        </h2>
+        {message && (
+          <div className="mb-4 rounded-lg bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-center">
+            {message}
+          </div>
+        )}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-center">
+            {error}
+          </div>
+        )}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label htmlFor="retailName" className="block text-gray-800 font-medium mb-1">
+              Retail Name
+            </label>
+            <input
+              type="text"
+              id="retailName"
+              name="retailName"
+              value={formData.retailName}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+              required
+              autoComplete="off"
+            />
+          </div>
+          <div>
+            <label htmlFor="streetAddress" className="block text-gray-800 font-medium mb-1">
+              Street Address
+            </label>
+            <input
+              type="text"
+              id="streetAddress"
+              name="streetAddress"
+              value={formData.streetAddress}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+              required
+              autoComplete="off"
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label htmlFor="city" className="block text-gray-800 font-medium mb-1">
+                City
+              </label>
+              <input
+                type="text"
+                id="city"
+                name="city"
+                value={formData.city}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+                required
+                autoComplete="off"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="state" className="block text-gray-800 font-medium mb-1">
+                State
+              </label>
+              <input
+                type="text"
+                id="state"
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+                required
+                autoComplete="off"
+              />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label htmlFor="zipCode" className="block text-gray-800 font-medium mb-1">
+                Zip Code
+              </label>
+              <input
+                type="text"
+                id="zipCode"
+                name="zipCode"
+                value={formData.zipCode}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+                required
+                autoComplete="off"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="country" className="block text-gray-800 font-medium mb-1">
+                Country
+              </label>
+              <input
+                type="text"
+                id="country"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+                required
+                autoComplete="off"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="mobileNumber" className="block text-gray-800 font-medium mb-1">
+              Mobile Number
+            </label>
+            <input
+              type="text"
+              id="mobileNumber"
+              name="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 bg-orange-50 transition"
+              required
+              autoComplete="off"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full py-3 px-4 bg-gradient-to-r from-orange-500 to-orange-400 text-white font-semibold rounded-lg shadow-md hover:from-orange-600 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400 transition"
+          >
+            Register Retail
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

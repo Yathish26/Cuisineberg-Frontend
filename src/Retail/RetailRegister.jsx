@@ -38,7 +38,7 @@ export default function RetailRegister() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-rose-50 to-white">
             <div className="max-w-md w-full bg-white/90 p-8 rounded-2xl shadow-2xl border border-rose-100">
-                <h2 className="text-3xl font-extrabold text-rose-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
+                <h2 className="text-3xl font-bold text-rose-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
                 <p className="text-center text-gray-500 mb-6">Join Cuisineberg and grow your business</p>
 
                 {message && (
@@ -110,7 +110,7 @@ export default function RetailRegister() {
                             onChange={handleChange}
                             className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
                             required
-                            placeholder="e.g. +1 234 567 8901"
+                            placeholder="e.g. +91 98765 43210"
                         />
                     </div>
 

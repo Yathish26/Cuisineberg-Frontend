@@ -33,13 +33,16 @@ export default function Homepage() {
               </button>
             </Link>
           </div>
+          <Link to="/howitworks" className="mt-8 inline-block text-red-600 hover:text-red-700">
+            <p className="text-lg font-semibold">Learn how it works</p>
+          </Link>
         </div>
       </section>
 
       {/* Features */}
       <section className="py-16 px-6 bg-[#fffaf0]">
         <div className="max-w-5xl mx-auto text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-10">Why Use Cuisineberg?</h3>
+          <h3 className="text-2xl font-bold text-gray-900 mb-10">At Cuisineberg we offer</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
             <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition border border-red-100">
               <h4 className="text-lg font-semibold mb-2 text-red-600">Dine-In Convenience</h4>

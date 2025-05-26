@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function AdminLogin() {
@@ -7,6 +7,13 @@ export default function AdminLogin() {
     const [message, setMessage] = useState('');
 
     const navigate = useNavigate();
+
+    useEffect(()=>{
+        const token = localStorage.getItem('admintoken');
+        if (token) {
+            navigate('/admin');
+        }
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

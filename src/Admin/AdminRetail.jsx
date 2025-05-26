@@ -6,9 +6,10 @@ export default function RetailAdmin() {
   const navigate = useNavigate();
   const [restaurant, setRestaurant] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [menuItem, setMenuItem] = useState({ itemName: "", price: "" });
+  const [menuItem, setMenuItem] = useState({ itemName: "", price: "", photoURL: "" });
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({});
+  const [menuEditMode, setMenuEditMode] = useState(false);
 
   // Fetch restaurant details
   const fetchRestaurant = async () => {
@@ -65,7 +66,7 @@ export default function RetailAdmin() {
       const data = await response.json();
       if (response.ok) {
         alert("Menu item added successfully!");
-        setMenuItem({ itemName: "", price: "" });
+        setMenuItem({ itemName: "", price: "", photoURL: "" });
         fetchRestaurant();
       } else {
         console.error(data.error);
@@ -203,6 +204,29 @@ export default function RetailAdmin() {
                 onChange={(e) => setFormData({ ...formData, restaurantName: e.target.value })}
                 className="block border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
               />
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="block border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
+              />
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  placeholder="Street"
+                  value={formData.restaurantAddress?.street}
+                  onChange={(e) => setFormData({ ...formData, restaurantAddress: { ...formData.restaurantAddress, street: e.target.value } })}
+                  className="block border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={formData.restaurantAddress?.city}
+                  onChange={(e) => setFormData({ ...formData, restaurantAddress: { ...formData.restaurantAddress, city: e.target.value } })}
+                  className="block border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+              </div>
               <button
                 onClick={updateRestaurant}
                 className="bg-orange-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-orange-700 transition"
@@ -220,20 +244,27 @@ export default function RetailAdmin() {
         </section>
 
         <section className="bg-white/90 backdrop-blur rounded-2xl shadow-xl p-8">
-          <h2 className="text-xl font-bold text-orange-600 mb-4">Menu</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold text-orange-600 mb-4">Menu</h2>
+            <button
+              onClick={() => setMenuEditMode(!menuEditMode)}
+              className={`${menuEditMode ? 'bg-green-500' : 'bg-orange-600'} text-white px-6 py-2 rounded-full font-semibold shadow hover:${menuEditMode ? 'bg-green-600' : 'bg-orange-700'} transition`}>Edit</button>
+          </div>
           <ul className="divide-y divide-orange-100">
             {restaurant?.menu.map((item) => (
               <li key={item._id} className="flex justify-between items-center py-3">
                 <span className="text-gray-800 font-medium">
                   {item.itemName} <span className="text-gray-400">–</span> <span className="text-orange-600 font-semibold">₹{item.price}</span>
                 </span>
-                <button
-                  onClick={() => deleteMenuItem(item._id)}
-                  className="bg-red-500 text-white px-3 py-1 rounded-full font-semibold shadow hover:bg-red-600 transition"
-                  title="Delete menu item"
-                >
-                  Delete
-                </button>
+                {menuEditMode &&
+                  <button
+                    onClick={() => deleteMenuItem(item._id)}
+                    className="bg-red-500 text-white px-3 py-1 rounded-full font-semibold shadow hover:bg-red-600 transition"
+                    title="Delete menu item"
+                  >
+                    Delete
+                  </button>
+                }
               </li>
             ))}
             {restaurant?.menu?.length === 0 && (
@@ -241,31 +272,40 @@ export default function RetailAdmin() {
             )}
           </ul>
 
-          <div className="mt-6 border-t pt-6">
-            <h3 className="font-semibold text-orange-600 mb-2">Add New Menu Item</h3>
-            <div className="flex flex-col md:flex-row gap-3">
-              <input
-                type="text"
-                placeholder="Item Name"
-                value={menuItem.itemName}
-                onChange={(e) => setMenuItem({ ...menuItem, itemName: e.target.value })}
-                className="border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
-              />
-              <input
-                type="number"
-                placeholder="Price"
-                value={menuItem.price}
-                onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })}
-                className="border border-orange-200 rounded-lg p-3 w-full md:w-32 focus:ring-2 focus:ring-orange-400 outline-none"
-              />
-              <button
-                onClick={addMenuItem}
-                className="bg-orange-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-orange-700 transition"
-              >
-                Add
-              </button>
+          {menuEditMode &&
+            <div className="mt-6 border-t pt-6">
+              <h3 className="font-semibold text-orange-600 mb-2">Add New Menu Item</h3>
+              <div className="flex flex-col md:flex-row gap-3">
+                <input
+                  type="text"
+                  placeholder="Item Name"
+                  value={menuItem.itemName}
+                  onChange={(e) => setMenuItem({ ...menuItem, itemName: e.target.value })}
+                  className="border border-orange-200 rounded-lg p-3 w-full focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+                <input
+                  type="number"
+                  placeholder="Price"
+                  value={menuItem.price}
+                  onChange={(e) => setMenuItem({ ...menuItem, price: e.target.value })}
+                  className="border border-orange-200 rounded-lg p-3 w-full md:w-32 focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Photo URL"
+                  value={menuItem.photoURL}
+                  onChange={(e) => setMenuItem({ ...menuItem, photoURL: e.target.value })}
+                  className="border border-orange-200 rounded-lg p-3 w-full md:w-32 focus:ring-2 focus:ring-orange-400 outline-none"
+                />
+                <button
+                  onClick={addMenuItem}
+                  className="bg-orange-600 text-white px-6 py-2 rounded-full font-semibold shadow hover:bg-orange-700 transition"
+                >
+                  Add
+                </button>
+              </div>
             </div>
-          </div>
+          }
         </section>
       </main>
     </div>

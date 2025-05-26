@@ -25,6 +25,7 @@ export default function Retail() {
   const [editingItem, setEditingItem] = useState(null); // Item being edited
   const [editItemName, setEditItemName] = useState('');
   const [editItemPrice, setEditItemPrice] = useState('');
+  const [editItemPhoto, setEditItemPhoto] = useState('');
 
   const [isDeleting, setIsDeleting] = useState(false); // For deletion
   const [deletingItemId, setDeletingItemId] = useState(null);
@@ -32,6 +33,13 @@ export default function Retail() {
   const [editButton, setEditButton] = useState(false);
 
   const navigate = useNavigate();
+
+  useEffect(()=>{
+    const token = localStorage.getItem('retailtoken');
+    if(!token){
+      navigate('/retail/login');
+    }
+  }, [navigate]);
 
   const fetchRestaurantData = async () => {
     try {
@@ -45,7 +53,8 @@ export default function Retail() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch restaurant data');
+        localStorage.removeItem('retailtoken');
+        navigate('/retail/login');
       }
 
       const data = await response.json();
@@ -122,13 +131,14 @@ export default function Retail() {
 
   const handleCancelAddItem = () => {
     setIsAddItemModalOpen(false);
-    setNewItem({ itemName: '', price: '' });
+    setNewItem({ itemName: '', price: '', photoURL: '' });
   }
 
   const handleEditItem = (item) => {
     setEditingItem(item);
     setEditItemName(item.itemName);
     setEditItemPrice(item.price);
+    setEditItemPhoto(item.photoURL);
     setIsEditing(true);
   };
 
@@ -170,6 +180,7 @@ export default function Retail() {
         setEditingItem(null);
         setEditItemName('');
         setEditItemPrice('');
+        setEditItemPhoto('');
         fetchRestaurantData();
       } else {
         alert('Failed to update item');
@@ -257,11 +268,10 @@ export default function Retail() {
             <h2 className="text-3xl font-bold text-orange-600">Menu</h2>
             <button
               onClick={() => setEditButton(!editButton)}
-              className={`${
-                editButton
+              className={`${editButton
                   ? 'bg-green-500 hover:bg-green-600'
                   : 'bg-orange-500 hover:bg-orange-600'
-              } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
+                } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
             >
               {editButton ? "Done" : "Edit Menu"}
             </button>
@@ -324,6 +334,13 @@ export default function Retail() {
                 onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
                 className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
+              <input
+                type="text"
+                placeholder="Photo URL (optional)"
+                value={newItem.photoURL}
+                onChange={(e) => setNewItem({ ...newItem, photoURL: e.target.value })}
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleAddItem}
@@ -359,6 +376,13 @@ export default function Retail() {
                 placeholder="Price"
                 value={editItemPrice}
                 onChange={(e) => setEditItemPrice(e.target.value)}
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              />
+              <input
+                type="text"
+                placeholder="Photo URL (optional)"
+                value={editItemPhoto}
+                onChange={(e) => setEditItemPhoto(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
               <div className="flex justify-end gap-3">
