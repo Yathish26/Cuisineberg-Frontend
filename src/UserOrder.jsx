@@ -87,7 +87,7 @@ export default function UserOrder() {
                 </div>
 
                 {/* Search Bar */}
-                <div className="sticky top-0 z-10 bg-white rounded-xl mb-4 shadow-sm flex items-center px-2 py-1 border border-orange-200">
+                <div className="sticky top-2 z-10 bg-white rounded-xl mb-4 shadow-sm flex items-center px-2 py-1 border border-orange-200">
                     <svg className="w-5 h-5 text-orange-400 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="8" stroke="currentColor" />
                         <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeLinecap="round" />
@@ -123,7 +123,26 @@ export default function UserOrder() {
 
                             <div className="flex flex-col justify-between w-full">
                                 <div>
-                                    <p className="text-base sm:text-lg font-semibold text-gray-800">{item.itemName}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-base sm:text-lg font-semibold text-gray-800">{item.itemName}</p>
+                                        {/* Veg/Non-Veg Symbol */}
+                                        {item.dishType === "V" && (
+                                            <span title="Vegetarian" className="inline-block">
+                                                <svg width="18" height="18" viewBox="0 0 18 18">
+                                                    <rect x="2" y="2" width="14" height="14" rx="3" fill="#2ecc40" stroke="#2ecc40" strokeWidth="1.5"/>
+                                                    <circle cx="9" cy="9" r="4" fill="#fff" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                        {item.dishType === "NV" && (
+                                            <span title="Non-Vegetarian" className="inline-block">
+                                                <svg width="18" height="18" viewBox="0 0 18 18">
+                                                    <rect x="2" y="2" width="14" height="14" rx="3" fill="#e74c3c" stroke="#e74c3c" strokeWidth="1.5"/>
+                                                    <circle cx="9" cy="9" r="4" fill="#fff" />
+                                                </svg>
+                                            </span>
+                                        )}
+                                    </div>
                                     <p className="text-xs sm:text-sm text-orange-600 mt-1 font-medium">₹ {item.price}</p>
                                 </div>
 

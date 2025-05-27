@@ -16,6 +16,38 @@ export default function Retail() {
     menu: [],
   });
 
+  const foodCategories = [
+    "Starters",
+    "Main Course",
+    "Biryani & Rice",
+    "Indian Breads",
+    "Curries & Gravies",
+    "Snacks",
+    "Breakfast",
+    "Desserts",
+    "Salads",
+    "Soups",
+    "Chinese",
+    "South Indian",
+    "North Indian",
+    "Fast Food",
+    "Burgers",
+    "Pizzas",
+    "Wraps & Rolls",
+    "Sandwiches",
+    "Beverages",
+    "Milkshakes",
+    "Mocktails",
+    "Ice Creams",
+    "Combos & Thalis",
+    "Tandoori",
+    "Seafood Specials",
+    "Egg Specials",
+    "Veg Specials",
+    "Non-Veg Specials"
+  ];
+
+
   const [orders, setOrders] = useState([]);
   const [isAddItemModalOpen, setIsAddItemModalOpen] = useState(false);
   const [newItem, setNewItem] = useState({ itemName: '', price: '', photoURL: '' });
@@ -105,6 +137,8 @@ export default function Retail() {
           itemName: newItem.itemName,
           price: price,
           photoURL: newItem.photoURL || '',
+          foodCategory: newItem.foodCategory || '',
+          dishType: newItem.dishType || '', // <-- add this
         }),
       });
 
@@ -119,7 +153,7 @@ export default function Retail() {
         setTimeout(() => {
           setIsItemAdded(false);
           setIsAddItemModalOpen(false);
-          setNewItem({ itemName: '', price: '', photoURL: '' });
+          setNewItem({ itemName: '', price: '', photoURL: '', foodCategory: '', dishType: '' });
         }, 1000);
       } else {
         alert('Failed to add item');
@@ -167,6 +201,8 @@ export default function Retail() {
           itemName: editItemName,
           price: price,
           photoURL: editItemPhoto || '',
+          foodCategory: editingItem?.foodCategory || '',
+          dishType: editingItem?.dishType || '', // <-- add this
         }),
       });
 
@@ -335,7 +371,6 @@ export default function Retail() {
           </button>
         </section>
 
-        {/* Add Item Modal */}
         {isAddItemModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
@@ -361,6 +396,49 @@ export default function Retail() {
                 onChange={(e) => setNewItem({ ...newItem, photoURL: e.target.value })}
                 className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
+              {/* Food Category Dropdown */}
+              <select
+                value={newItem.foodCategory || ''}
+                onChange={(e) => setNewItem({ ...newItem, foodCategory: e.target.value })}
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="">Select Food Category</option>
+                {foodCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              {/*Veg/Non-Veg/None Selection */}
+              <div className="mb-6 flex gap-4 items-center">
+                <span className="text-gray-700 font-medium">Type:</span>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="dishType"
+                    value="V"
+                    checked={newItem.dishType === 'V'}
+                    onChange={() => setNewItem({ ...newItem, dishType: 'V' })}
+                  />
+                  <span>Veg</span>
+                  <input
+                    type="radio"
+                    name="dishType"
+                    value="NV"
+                    checked={newItem.dishType === 'NV'}
+                    onChange={() => setNewItem({ ...newItem, dishType: 'NV' })}
+                  />
+                  <span>Non-Veg</span>
+                </label>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="dishType"
+                    value=""
+                    checked={!newItem.dishType}
+                    onChange={() => setNewItem({ ...newItem, dishType: '' })}
+                  />
+                  <span>None</span>
+                </label>
+              </div>
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleAddItem}
@@ -378,8 +456,6 @@ export default function Retail() {
             </div>
           </div>
         )}
-
-        {/* Edit Item Modal */}
         {isEditing && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
@@ -405,6 +481,55 @@ export default function Retail() {
                 onChange={(e) => setEditItemPhoto(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
+              {/* Food Category Dropdown */}
+              <select
+                value={editingItem?.foodCategory || ''}
+                onChange={(e) =>
+                  setEditingItem((prev) => ({ ...prev, foodCategory: e.target.value }))
+                }
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="">Select Food Category</option>
+                {foodCategories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+              {/* Veg/Non-Veg/None Selection */}
+              <div className="mb-6 flex gap-4 items-center">
+                <span className="text-gray-700 font-medium">Type:</span>
+                <label className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="editVegType"
+                    value="V"
+                    checked={editingItem?.dishType === 'V'}
+                    onChange={() =>
+                      setEditingItem((prev) => ({ ...prev, dishType: 'V' }))
+                    }
+                  />
+                  <span>Veg</span>
+                  <input
+                    type="radio"
+                    name="editVegType"
+                    value="NV"
+                    checked={editingItem?.dishType === 'NV'}
+                    onChange={() =>
+                      setEditingItem((prev) => ({ ...prev, dishType: 'NV' }))
+                    }
+                  />
+                  <span>Non-Veg</span>
+                  <input
+                    type="radio"
+                    name="editVegType"
+                    value=""
+                    checked={!editingItem?.dishType}
+                    onChange={() =>
+                      setEditingItem((prev) => ({ ...prev, dishType: '' }))
+                    }
+                  />
+                  <span>None</span>
+                </label>
+              </div>
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleSaveEdit}
@@ -422,8 +547,6 @@ export default function Retail() {
             </div>
           </div>
         )}
-
-        {/* Delete Confirmation */}
         {isDeleting && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
