@@ -62,21 +62,21 @@ export default function UserOrder() {
     );
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 py-3">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 py-3 flex justify-center">
             <div
-                className="max-w-2xl mx-auto bg-white shadow-2xl rounded-3xl p-3 sm:p-6 border border-orange-100 relative"
+                className="w-full max-w-2xl xl:max-w-4xl 2xl:max-w-6xl mx-auto bg-white shadow-2xl rounded-3xl p-3 sm:p-6 border border-orange-100 relative"
                 style={{ marginBottom: cart.length === 0 ? '0px' : `${180 + cart.length * 24}px` }}
             >
                 {/* Restaurant Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                     <div className="flex items-center gap-3">
                         <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">{restaurant.restaurantName}</h1>
-                            <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/pin-location-03-stroke-standard.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="#f97316">
-                                    <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <path d="M12 10V17" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-                                    <circle cx="12" cy="6" r="4" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-orange-600 mb-1">{restaurant.restaurantName}</h1>
+                            <p className="text-xs sm:text-sm xl:text-base text-gray-500 flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="injected-svg" data-src="https://cdn.hugeicons.com/icons/pin-location-03-stroke-standard.svg" xmlnsXlink="http://www.w3.org/1999/xlink" role="img" color="#f97316">
+                                    <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                    <path d="M12 10V17" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
+                                    <circle cx="12" cy="6" r="4" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
                                 </svg>
                                 <span>{restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}</span>
                             </p>
@@ -93,15 +93,15 @@ export default function UserOrder() {
                     <input
                         type="text"
                         placeholder="Search for delicious dishes..."
-                        className="w-full px-2 py-2 bg-transparent focus:outline-none text-sm"
+                        className="w-full px-2 py-2 bg-transparent focus:outline-none text-sm xl:text-base"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
 
                 {/* Menu */}
-                <h2 className="text-xl sm:text-2xl font-bold text-orange-500 mb-3">Menu</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <h2 className="text-xl sm:text-2xl xl:text-3xl font-bold text-orange-500 mb-3">Menu</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
                     {filteredMenu.length > 0 ? filteredMenu.map((item) => (
                         <div
                             key={item._id}
@@ -111,10 +111,10 @@ export default function UserOrder() {
                                 <img
                                     src={item.photoURL}
                                     alt={item.itemName}
-                                    className="w-24 h-24 sm:w-full sm:h-36 object-cover rounded-xl bg-white shadow"
+                                    className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 object-cover rounded-xl bg-white shadow"
                                 />
                             ) : (
-                                <div className="w-24 h-24 sm:w-full sm:h-36 flex items-center justify-center rounded-xl bg-orange-100 text-orange-400 text-3xl font-bold">
+                                <div className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 flex items-center justify-center rounded-xl bg-orange-100 text-orange-400 text-3xl font-bold">
                                     🍽️
                                 </div>
                             )}
@@ -122,7 +122,7 @@ export default function UserOrder() {
                             <div className="flex flex-col justify-between w-full">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <p className="text-base sm:text-lg font-semibold text-gray-800">{item.itemName}</p>
+                                        <p className="text-base sm:text-lg xl:text-xl font-semibold text-gray-800">{item.itemName}</p>
                                         {/* Veg/Non-Veg Symbol */}
                                         {item.dishType === "V" && (
                                             <span title="Vegetarian" className="inline-block">
@@ -141,12 +141,12 @@ export default function UserOrder() {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs sm:text-sm text-orange-600 mt-1 font-medium">₹ {item.price}</p>
+                                    <p className="text-xs sm:text-sm xl:text-base text-orange-600 mt-1 font-medium">₹ {item.price}</p>
                                 </div>
 
                                 <button
                                     onClick={() => addToCart(item)}
-                                    className="mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-bold py-1.5 px-3 rounded-xl transition text-sm shadow"
+                                    className="mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-bold py-1.5 px-3 rounded-xl transition text-sm xl:text-base shadow"
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
                                         <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z" />
@@ -156,17 +156,17 @@ export default function UserOrder() {
                             </div>
                         </div>
                     )) : (
-                        <p className="text-center col-span-2 text-sm text-orange-400">No items match your search.</p>
+                        <p className="text-center col-span-2 xl:col-span-3 2xl:col-span-4 text-sm xl:text-base text-orange-400">No items match your search.</p>
                     )}
                 </div>
 
                 {/* Cart / Order Bar */}
                 {cart.length > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md mx-auto">
-                        <h3 className="text-lg sm:text-xl font-bold text-orange-600 mb-3">Your Order</h3>
+                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto">
+                        <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
                         <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
                             {cart.map((item) => (
-                                <li key={item._id} className="flex justify-between items-center text-sm sm:text-base">
+                                <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
                                     <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">₹ {item.price * item.quantity}</span>
@@ -184,11 +184,11 @@ export default function UserOrder() {
                                 </li>
                             ))}
                         </ul>
-                        <div className="flex justify-between font-semibold text-base sm:text-lg text-gray-800 mb-3">
+                        <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
                             <span>Total</span>
                             <span>₹ {totalAmount}</span>
                         </div>
-                        <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg font-bold shadow transition">
+                        <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
                             Order Now
                         </button>
                     </div>
