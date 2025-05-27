@@ -70,15 +70,13 @@ export default function UserOrder() {
                 {/* Restaurant Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
                     <div className="flex items-center gap-3">
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-orange-400 to-yellow-300 flex items-center justify-center shadow-lg text-2xl font-bold text-white">
-                            {restaurant.restaurantName?.[0]}
-                        </div>
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold text-orange-600 mb-1">{restaurant.restaurantName}</h1>
                             <p className="text-xs sm:text-sm text-gray-500 flex items-center gap-1">
-                                <svg className="inline-block w-5 h-5 text-lg" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                    <path d="M12 2C8.134 2 5 5.134 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.866-3.134-7-7-7z"></path>
-                                    <circle cx="12" cy="9" r="2.5"></circle>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/pin-location-03-stroke-standard.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="#f97316">
+                                    <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <path d="M12 10V17" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                                    <circle cx="12" cy="6" r="4" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
                                 </svg>
                                 <span>{restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}</span>
                             </p>
@@ -128,17 +126,17 @@ export default function UserOrder() {
                                         {/* Veg/Non-Veg Symbol */}
                                         {item.dishType === "V" && (
                                             <span title="Vegetarian" className="inline-block">
-                                                <svg width="18" height="18" viewBox="0 0 18 18">
-                                                    <rect x="2" y="2" width="14" height="14" rx="3" fill="#2ecc40" stroke="#2ecc40" strokeWidth="1.5"/>
-                                                    <circle cx="9" cy="9" r="4" fill="#fff" />
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#0F8A65" />
+                                                    <circle cx="8" cy="8" r="4" fill="#0F8A65" />
                                                 </svg>
                                             </span>
                                         )}
                                         {item.dishType === "NV" && (
                                             <span title="Non-Vegetarian" className="inline-block">
-                                                <svg width="18" height="18" viewBox="0 0 18 18">
-                                                    <rect x="2" y="2" width="14" height="14" rx="3" fill="#e74c3c" stroke="#e74c3c" strokeWidth="1.5"/>
-                                                    <circle cx="9" cy="9" r="4" fill="#fff" />
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#E43B4F" />
+                                                    <path d="M3 12L8 4L13 12H3Z" fill="#E43B4F" />
                                                 </svg>
                                             </span>
                                         )}
