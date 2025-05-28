@@ -6,6 +6,8 @@ export default function Inventory() {
     const [itemName, setItemName] = useState('');
     const [photoURLs, setPhotoURLs] = useState(['']);
     const [editingId, setEditingId] = useState(null);
+    const [editName, setEditName] = useState('');
+    const [editPhotoURLs, setEditPhotoURLs] = useState(['']);
     const [hoveredId, setHoveredId] = useState(null);
 
     useEffect(() => {
@@ -30,26 +32,38 @@ export default function Inventory() {
     const handleAddItem = async () => {
         if (!itemName.trim()) return;
         const newItem = { name: itemName, photos: photoURLs.filter(url => url.trim()) };
-
-        if (editingId) {
-            await axios.put(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items/${editingId}`, newItem);
-        } else {
-            await axios.post(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items`, newItem);
-        }
-
+        await axios.post(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items`, newItem);
         setItemName('');
         setPhotoURLs(['']);
-        setEditingId(null);
         fetchItems();
     };
 
     const handleEdit = (item) => {
-        setItemName(item.name);
-        setPhotoURLs(item.photos);
         setEditingId(item._id);
+        setEditName(item.name);
+        setEditPhotoURLs(item.photos);
+    };
+
+    const handleEditChange = (index, value) => {
+        const newURLs = [...editPhotoURLs];
+        newURLs[index] = value;
+        setEditPhotoURLs(newURLs);
+    };
+
+    const handleAddEditField = () => {
+        setEditPhotoURLs([...editPhotoURLs, '']);
+    };
+
+    const handleUpdateItem = async () => {
+        const updatedItem = { name: editName, photos: editPhotoURLs.filter(url => url.trim()) };
+        await axios.put(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items/${editingId}`, updatedItem);
+        setEditingId(null);
+        fetchItems();
     };
 
     const handleDelete = async (id) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this item?');
+        if (!confirmDelete) return;
         await axios.delete(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items/${id}`);
         fetchItems();
     };
@@ -58,27 +72,29 @@ export default function Inventory() {
         <div className="p-4 max-w-4xl mx-auto">
             <h2 className="text-xl font-bold mb-4 text-orange-600">Inventory</h2>
 
-            <div className="bg-orange-50 p-3 rounded-lg shadow mb-4">
+            {/* Add New Item Form */}
+            <div className="my-10 p-6 border rounded-lg bg-white shadow-md">
+                <h3 className="text-lg font-bold text-orange-600 mb-4">Add New Item</h3>
                 <div className="mb-3">
-                    <label className="block  font-medium text-gray-700 mb-1">Item Name</label>
+                    <label className="block font-medium text-gray-700 mb-1">Item Name</label>
                     <input
                         type="text"
                         value={itemName}
                         onChange={(e) => setItemName(e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md "
-                        placeholder="e.g., Chicken Biryani"
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder="e.g., Paneer Tikka"
                     />
                 </div>
 
                 <div className="mb-3">
-                    <label className="block  font-medium text-gray-700 mb-1">Photo URLs</label>
+                    <label className="block font-medium text-gray-700 mb-1">Photo URLs</label>
                     {photoURLs.map((url, index) => (
                         <input
                             key={index}
                             type="text"
                             value={url}
                             onChange={(e) => handlePhotoChange(index, e.target.value)}
-                            className="w-full mb-2 px-3 py-2 border rounded-md "
+                            className="w-full mb-2 px-3 py-2 border rounded-md"
                             placeholder={`Image URL ${index + 1}`}
                         />
                     ))}
@@ -93,12 +109,13 @@ export default function Inventory() {
 
                 <button
                     onClick={handleAddItem}
-                    className="bg-orange-500 text-white px-3 py-1.5 rounded-md  font-medium hover:bg-orange-600"
+                    className="bg-orange-500 text-white px-4 py-2 rounded-md font-medium hover:bg-orange-600 w-full"
                 >
-                    {editingId ? 'Update' : 'Save'}
+                    Add Item
                 </button>
             </div>
 
+            {/* Inventory Items */}
             <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
                 {items.map((item) => (
                     <div
@@ -138,6 +155,65 @@ export default function Inventory() {
                     </div>
                 ))}
             </div>
+
+            
+
+            {/* Edit Modal */}
+            {editingId && (
+                <div className="fixed inset-0 bg-black bg-opacity-30 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
+                        <button
+                            className="absolute top-2 right-3 text-gray-600 hover:text-black"
+                            onClick={() => {
+                                setEditingId(null);
+                                setEditName('');
+                                setEditPhotoURLs(['']);
+                            }}
+                        >
+                            ✕
+                        </button>
+                        <h3 className="text-lg font-bold mb-4 text-orange-600">Edit Item</h3>
+
+                        <div className="mb-3">
+                            <label className="block font-medium text-gray-700 mb-1">Item Name</label>
+                            <input
+                                type="text"
+                                value={editName}
+                                onChange={(e) => setEditName(e.target.value)}
+                                className="w-full px-3 py-2 border rounded-md"
+                            />
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="block font-medium text-gray-700 mb-1">Photo URLs</label>
+                            {editPhotoURLs.map((url, index) => (
+                                <input
+                                    key={index}
+                                    type="text"
+                                    value={url}
+                                    onChange={(e) => handleEditChange(index, e.target.value)}
+                                    className="w-full mb-2 px-3 py-2 border rounded-md"
+                                    placeholder={`Image URL ${index + 1}`}
+                                />
+                            ))}
+                            <button
+                                type="button"
+                                onClick={handleAddEditField}
+                                className="text-xs text-blue-600 hover:underline"
+                            >
+                                + Add another image
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={handleUpdateItem}
+                            className="bg-orange-500 text-white px-4 py-2 rounded-md font-medium hover:bg-orange-600 w-full"
+                        >
+                            Update
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
