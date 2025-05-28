@@ -6,3 +6,26 @@
 body {
   font-family: 'League Spartan', sans-serif;
 }
+
+/* Styles for the desktop cart sidebar transition */
+.cart-sidebar-enter {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.cart-sidebar-enter-active {
+  transform: translateX(0%);
+  opacity: 1;
+  transition: transform 200ms ease-in-out, opacity 500ms ease-in-out;
+}
+
+.cart-sidebar-exit {
+  transform: translateX(0%);
+  opacity: 1;
+}
+
+.cart-sidebar-exit-active {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
+}

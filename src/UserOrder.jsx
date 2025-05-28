@@ -1,199 +1,251 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import { CSSTransition } from 'react-transition-group';
 
 export default function UserOrder() {
     const { slug } = useParams();
-    const publicCode = slug?.split('-').pop();
+    const publicCode = useMemo(() => slug?.split('-').pop(), [slug]);
     const [restaurant, setRestaurant] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState('');
+    const nodeRef = useRef(null);
 
     useEffect(() => {
+        let ignore = false;
         const fetchRestaurant = async () => {
             try {
                 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/cuisineberg/business/public`, {
-                    headers: {
-                        'x-pub-key': publicCode,
-                    },
+                    headers: { 'x-pub-key': publicCode },
                 });
-                setRestaurant(res.data);
+                if (!ignore) setRestaurant(res.data);
             } catch (err) {
+                if (!ignore) setRestaurant(null);
                 console.error('Failed to fetch restaurant:', err);
             } finally {
-                setLoading(false);
+                if (!ignore) setLoading(false);
             }
         };
-
-        if (publicCode) {
-            fetchRestaurant();
-        }
+        if (publicCode) fetchRestaurant();
+        return () => { ignore = true; };
     }, [publicCode]);
 
-    const addToCart = (item) => {
-        setCart((prevCart) => {
-            const existing = prevCart.find((i) => i._id === item._id);
-            if (existing) {
-                return prevCart.map((i) =>
-                    i._id === item._id ? { ...i, quantity: i.quantity + 1 } : i
-                );
-            } else {
-                return [...prevCart, { ...item, quantity: 1 }];
+    const filteredMenu = useMemo(() => {
+        if (!restaurant) return [];
+        const s = search.toLowerCase();
+        return restaurant.menu.filter(item => item.itemName.toLowerCase().includes(s));
+    }, [restaurant, search]);
+
+    const totalAmount = useMemo(
+        () => cart.reduce((total, item) => total + item.price * item.quantity, 0),
+        [cart]
+    );
+
+    const addToCart = useCallback((item) => {
+        setCart(prevCart => {
+            const idx = prevCart.findIndex(i => i._id === item._id);
+            if (idx > -1) {
+                const updated = [...prevCart];
+                updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + 1 };
+                return updated;
             }
+            return [...prevCart, { ...item, quantity: 1 }];
         });
-    };
+    }, []);
 
-    const removeFromCart = (itemId) => {
-        setCart((prevCart) => {
-            return prevCart
-                .map((i) => (i._id === itemId ? { ...i, quantity: i.quantity - 1 } : i))
-                .filter((i) => i.quantity > 0);
-        });
-    };
-
-    const totalAmount = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    const removeFromCart = useCallback((itemId) => {
+        setCart(prevCart =>
+            prevCart
+                .map(i => (i._id === itemId ? { ...i, quantity: i.quantity - 1 } : i))
+                .filter(i => i.quantity > 0)
+        );
+    }, []);
 
     if (loading) return <div className="text-center py-10 text-lg text-red-500 animate-pulse">Loading restaurant info...</div>;
     if (!restaurant) return <div className="text-center py-10 text-lg text-red-600">Restaurant not found.</div>;
 
-    const filteredMenu = restaurant.menu.filter(item =>
-        item.itemName.toLowerCase().includes(search.toLowerCase())
-    );
+    // Only show cart if there are items
+    const showCart = cart.length > 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 py-3 flex justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 py-3 flex gap-4 justify-center">
             <div
-                className="w-full max-w-2xl xl:max-w-4xl 2xl:max-w-6xl mx-auto bg-white shadow-2xl rounded-3xl p-3 sm:p-6 border border-orange-100 relative"
-                style={{ marginBottom: cart.length === 0 ? '0px' : `${180 + cart.length * 24}px` }}
+                className="w-full max-w-2xl xl:max-w-4xl 2xl:max-w-6xl mx-auto bg-white shadow-2xl rounded-3xl p-3 sm:p-6 border border-orange-100 relative lg:flex lg:gap-6"
             >
-                {/* Restaurant Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-                    <div className="flex items-center gap-3">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-orange-600 mb-1">{restaurant.restaurantName}</h1>
-                            <p className="text-xs sm:text-sm xl:text-base text-gray-500 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" className="injected-svg" data-src="https://cdn.hugeicons.com/icons/pin-location-03-stroke-standard.svg" xmlnsXlink="http://www.w3.org/1999/xlink" role="img" color="#f97316">
-                                    <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                    <path d="M12 10V17" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path>
-                                    <circle cx="12" cy="6" r="4" stroke="#f97316" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></circle>
-                                </svg>
-                                <span>{restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}</span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Search Bar */}
-                <div className="sticky top-2 z-10 bg-white rounded-xl mb-4 shadow-sm flex items-center px-2 py-1 border border-orange-200">
-                    <svg className="w-5 h-5 text-orange-400 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="8" stroke="currentColor" />
-                        <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeLinecap="round" />
-                    </svg>
-                    <input
-                        type="text"
-                        placeholder="Search for delicious dishes..."
-                        className="w-full px-2 py-2 bg-transparent focus:outline-none text-sm xl:text-base"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-
-                {/* Menu */}
-                <h2 className="text-xl sm:text-2xl xl:text-3xl font-bold text-orange-500 mb-3">Menu</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
-                    {filteredMenu.length > 0 ? filteredMenu.map((item) => (
-                        <div
-                            key={item._id}
-                            className="flex flex-row sm:flex-col w-full justify-between bg-gradient-to-br from-orange-50 to-yellow-50 p-3 rounded-2xl border border-orange-100 shadow hover:shadow-lg transition gap-3"
-                        >
-                            {item.photoURL ? (
-                                <img
-                                    src={item.photoURL}
-                                    alt={item.itemName}
-                                    className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 object-cover rounded-xl bg-white shadow"
-                                />
-                            ) : (
-                                <div className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 flex items-center justify-center rounded-xl bg-orange-100 text-orange-400 text-3xl font-bold">
-                                    🍽️
-                                </div>
-                            )}
-
-                            <div className="flex flex-col justify-between w-full">
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-base sm:text-lg xl:text-xl font-semibold text-gray-800">{item.itemName}</p>
-                                        {/* Veg/Non-Veg Symbol */}
-                                        {item.dishType === "V" && (
-                                            <span title="Vegetarian" className="inline-block">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#0F8A65" />
-                                                    <circle cx="8" cy="8" r="4" fill="#0F8A65" />
-                                                </svg>
-                                            </span>
-                                        )}
-                                        {item.dishType === "NV" && (
-                                            <span title="Non-Vegetarian" className="inline-block">
-                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#E43B4F" />
-                                                    <path d="M3 12L8 4L13 12H3Z" fill="#E43B4F" />
-                                                </svg>
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs sm:text-sm xl:text-base text-orange-600 mt-1 font-medium">₹ {item.price}</p>
-                                </div>
-
-                                <button
-                                    onClick={() => addToCart(item)}
-                                    className="mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-bold py-1.5 px-3 rounded-xl transition text-sm xl:text-base shadow"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                        <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z" />
+                {/* Left Section: Menu and Header */}
+                <div className="flex-1">
+                    {/* Restaurant Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl xl:text-4xl font-bold text-orange-600 mb-1">
+                                    {restaurant.restaurantName}
+                                </h1>
+                                <p className="text-xs sm:text-sm xl:text-base text-gray-500 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#f97316">
+                                        <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M12 10V17" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        <circle cx="12" cy="6" r="4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                                     </svg>
-                                    Add
-                                </button>
+                                    <span>{restaurant.restaurantAddress?.street}, {restaurant.restaurantAddress?.city}</span>
+                                </p>
                             </div>
                         </div>
-                    )) : (
-                        <p className="text-center col-span-2 xl:col-span-3 2xl:col-span-4 text-sm xl:text-base text-orange-400">No items match your search.</p>
-                    )}
-                </div>
-
-                {/* Cart / Order Bar */}
-                {cart.length > 0 && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto">
-                        <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
-                        <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
-                            {cart.map((item) => (
-                                <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
-                                    <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-medium">₹ {item.price * item.quantity}</span>
-                                        <button
-                                            onClick={() => removeFromCart(item._id)}
-                                            className="p-1 rounded-full hover:bg-orange-100 transition"
-                                            aria-label="Remove"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                                <circle cx="12" cy="12" r="10" stroke="#fb923c" strokeWidth="2" />
-                                                <path d="M16 12H8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
-                            <span>Total</span>
-                            <span>₹ {totalAmount}</span>
-                        </div>
-                        <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
-                            Order Now
-                        </button>
                     </div>
-                )}
+
+                    {/* Search Bar */}
+                    <div className="sticky top-2 z-10 bg-white rounded-xl mb-4 shadow-sm flex items-center px-2 py-1 border border-orange-200">
+                        <svg className="w-5 h-5 text-orange-400 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" stroke="currentColor" />
+                            <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeLinecap="round" />
+                        </svg>
+                        <input
+                            type="text"
+                            placeholder="Search for delicious dishes..."
+                            className="w-full px-2 py-2 bg-transparent focus:outline-none text-sm xl:text-base"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                        />
+                    </div>
+
+                    {/* Menu */}
+                    <h2 className="text-xl sm:text-2xl xl:text-3xl font-bold text-orange-500 mb-3">Menu</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+                        {filteredMenu.length > 0 ? filteredMenu.map(item => (
+                            <div
+                                key={item._id}
+                                className="flex flex-row sm:flex-col w-full justify-between bg-gradient-to-br from-orange-50 to-yellow-50 p-3 rounded-2xl border border-orange-100 shadow hover:shadow-lg transition gap-3"
+                            >
+                                {item.photoURL ? (
+                                    <img
+                                        src={item.photoURL}
+                                        alt={item.itemName}
+                                        className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 object-cover rounded-xl bg-white shadow"
+                                    />
+                                ) : (
+                                    <div className="w-24 h-24 sm:w-full sm:h-36 xl:h-48 flex items-center justify-center rounded-xl bg-orange-100 text-orange-400 text-3xl font-bold">
+                                        🍽️
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col justify-between w-full">
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <p className="text-base sm:text-lg xl:text-xl font-semibold text-gray-800">{item.itemName}</p>
+                                            {item.dishType === "V" && (
+                                                <span title="Vegetarian">
+                                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                                        <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#0F8A65" />
+                                                        <circle cx="8" cy="8" r="4" fill="#0F8A65" />
+                                                    </svg>
+                                                </span>
+                                            )}
+                                            {item.dishType === "NV" && (
+                                                <span title="Non-Vegetarian">
+                                                    <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+                                                        <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" stroke="#E43B4F" />
+                                                        <path d="M3 12L8 4L13 12H3Z" fill="#E43B4F" />
+                                                    </svg>
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs sm:text-sm xl:text-base text-orange-600 mt-1 font-medium">₹ {item.price}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => addToCart(item)}
+                                        className="mt-3 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white font-bold py-1.5 px-3 rounded-xl transition text-sm xl:text-base shadow"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                            <path fill="#fff" d="M13 8a1 1 0 10-2 0v3H8a1 1 0 100 2h3v3a1 1 0 102 0v-3h3a1 1 0 100-2h-3V8Z" />
+                                        </svg>
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <p className="text-center col-span-2 xl:col-span-3 2xl:col-span-4 text-sm xl:text-base text-orange-400">No items match your search.</p>
+                        )}
+                    </div>
+                </div>
             </div>
+
+            {/* Right Sidebar Cart - Desktop */}
+            <CSSTransition
+                in={showCart}
+                timeout={300}
+                classNames="cart-sidebar"
+                unmountOnExit
+                nodeRef={nodeRef}
+            >
+                <div
+                    ref={nodeRef}
+                    className="hidden lg:block w-full max-w-sm sticky top-4 self-start bg-white border border-orange-200 shadow-2xl rounded-3xl p-4 h-fit"
+                >
+                    <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
+                    <ul className="space-y-2 mb-3 max-h-64 overflow-y-auto pr-2">
+                        {cart.map(item => (
+                            <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
+                                <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium">₹ {item.price * item.quantity}</span>
+                                    <button
+                                        onClick={() => removeFromCart(item._id)}
+                                        className="p-1 rounded-full hover:bg-orange-100 transition"
+                                        aria-label="Remove"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke="#fb923c" strokeWidth="2" />
+                                            <path d="M16 12H8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
+                        <span>Total</span>
+                        <span>₹ {totalAmount}</span>
+                    </div>
+                    <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
+                        Order Now
+                    </button>
+                </div>
+            </CSSTransition>
+
+            {/* Mobile Bottom Cart */}
+            {showCart && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto lg:hidden">
+                    <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
+                    <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
+                        {cart.map(item => (
+                            <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
+                                <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
+                                <div className="flex items-center gap-2">
+                                    <span className="font-medium">₹ {item.price * item.quantity}</span>
+                                    <button
+                                        onClick={() => removeFromCart(item._id)}
+                                        className="p-1 rounded-full hover:bg-orange-100 transition"
+                                        aria-label="Remove"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke="#fb923c" strokeWidth="2" />
+                                            <path d="M16 12H8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
+                        <span>Total</span>
+                        <span>₹ {totalAmount}</span>
+                    </div>
+                    <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
+                        Order Now
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
