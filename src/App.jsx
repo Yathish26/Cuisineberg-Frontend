@@ -14,6 +14,7 @@ import RetailAdmin from "./Admin/AdminRetail";
 import Order from "./Order";
 import UserOrder from "./UserOrder";
 import Works from "./Works";
+import Inventory from "./Inventory";
 
 function App() {
 
@@ -35,6 +36,7 @@ function App() {
           <Route path='/retail/register' element={<RetailRegister />} />
           <Route path='/retail' element={<Retail />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
+          <Route path="/inventory" element={<Inventory />} />
         </Routes>
       </Router>
     </>
