@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Loading from '../Components/Loading';
 
 export default function Retail() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -58,11 +59,14 @@ export default function Retail() {
   const [editItemName, setEditItemName] = useState('');
   const [editItemPrice, setEditItemPrice] = useState('');
   const [editItemPhoto, setEditItemPhoto] = useState('');
+  const [search, setSearch] = useState('');
 
   const [isDeleting, setIsDeleting] = useState(false); // For deletion
   const [deletingItemId, setDeletingItemId] = useState(null);
 
   const [editButton, setEditButton] = useState(false);
+
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -98,17 +102,24 @@ export default function Retail() {
         restaurantAddress: data.restaurantAddress || {},
         mobileNumber: data.mobileNumber,
         menu: data.menu || [],
+        publicCode: data.publicCode
       });
 
       setOrders([]); // Placeholder for orders
     } catch (error) {
       console.error('Error fetching restaurant data:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchRestaurantData();
   }, []);
+
+  const filteredMenu = restaurantInfo.menu.filter(item =>
+    item.itemName?.toLowerCase().includes(search.toLowerCase())
+  );
 
   const handleAddItem = async () => {
     if (!newItem.itemName || !newItem.price) {
@@ -125,6 +136,7 @@ export default function Retail() {
     try {
       const token = localStorage.getItem('retailtoken');
       const email = restaurantInfo.email;
+      const publicCode = restaurantInfo.publicCode;
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/restaurant/addmenu`, {
         method: 'POST',
@@ -133,7 +145,7 @@ export default function Retail() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          email: email,
+          publicCode: publicCode,
           itemName: newItem.itemName,
           price: price,
           photoURL: newItem.photoURL || '',
@@ -265,6 +277,12 @@ export default function Retail() {
     navigate('/retail/login');
   };
 
+  if (loading) {
+    return (
+      <Loading />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
       {/* Restaurant Info */}
@@ -282,7 +300,7 @@ export default function Retail() {
               onClick={() => navigate('/retail/edit')}
               className="bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200 backdrop-blur"
             >
-              Edit Info
+              Edit Profile
             </button>
             <button
               onClick={handleLogout}
@@ -299,7 +317,7 @@ export default function Retail() {
         <p className="text-5xl font-bold text-gray-800">{restaurantInfo.menu.length}</p>
       </section>
 
-      <main className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-10">
+      <main className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Menu Section */}
         <section className="bg-white/90 rounded-2xl shadow-xl p-8 border border-orange-100">
           <div className="flex justify-between items-center mb-6">
@@ -311,15 +329,72 @@ export default function Retail() {
                 : 'bg-orange-500 hover:bg-orange-600'
                 } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
             >
-              {editButton ? "Done" : "Edit Menu"}
+              {editButton ? "Done" : "Edit"}
             </button>
           </div>
+          <div className="relative">
+            <input
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-4 pl-10 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              type="text"
+              name="search"
+              id="search"
+              placeholder="Search menu item"
+              aria-label="Search menu item"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            {/* Search Icon */}
+            <span className="absolute top-[36%] left-4 transform -translate-y-1/2 text-gray-500 pointer-events-none">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </span>
+
+            {/* Clear (X) Icon */}
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute top-[36%] right-4 transform -translate-y-1/2 text-gray-500 hover:text-red-500 focus:outline-none"
+                aria-label="Clear search"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+
+
           <ul className="space-y-4">
-            {restaurantInfo.menu.length > 0 ? (
-              restaurantInfo.menu.map((item) => (
+            {filteredMenu.length > 0 ? (
+              filteredMenu.map((item) => (
                 <li
                   key={item._id}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow transition"
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow transition`}
                 >
                   {item.photoURL && (
                     <img
@@ -369,6 +444,13 @@ export default function Retail() {
           >
             + Add Item
           </button>
+        </section>
+
+        <section>
+          <div className="bg-white/90 rounded-2xl shadow-xl p-8 border border-orange-100">
+            <h2 className="text-3xl font-bold text-orange-600 mb-6">Orders</h2>
+            <p className="text-gray-500">You can manage orders here in the future.</p>
+          </div>
         </section>
 
         {isAddItemModalOpen && (

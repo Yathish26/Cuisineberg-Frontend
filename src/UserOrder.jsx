@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { CSSTransition } from 'react-transition-group';
+import Loading from './Components/Loading';
 
 export default function UserOrder() {
     const { slug } = useParams();
@@ -11,6 +12,8 @@ export default function UserOrder() {
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState('');
     const nodeRef = useRef(null);
+    const [orderMode, setOrderMode] = useState(false);
+    const [selectedOrderType, setSelectedOrderType] = useState('');
 
     useEffect(() => {
         let ignore = false;
@@ -62,14 +65,14 @@ export default function UserOrder() {
         );
     }, []);
 
-    if (loading) return <div className="text-center py-10 text-lg text-red-500 animate-pulse">Loading restaurant info...</div>;
+    if (loading) return <Loading />;
     if (!restaurant) return <div className="text-center py-10 text-lg text-red-600">Restaurant not found.</div>;
 
     // Only show cart if there are items
     const showCart = cart.length > 0;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 py-3 flex gap-4 justify-center">
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 lg:px-6 py-3 flex gap-4 justify-center">
             <div
                 className="w-full max-w-2xl xl:max-w-4xl 2xl:max-w-6xl mx-auto bg-white shadow-2xl rounded-3xl p-3 sm:p-6 border border-orange-100 relative lg:flex lg:gap-6"
             >
@@ -207,44 +210,115 @@ export default function UserOrder() {
                         <span>Total</span>
                         <span>₹ {totalAmount}</span>
                     </div>
-                    <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
+                    <button onClick={() => setOrderMode(!orderMode)} className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
                         Order Now
                     </button>
+                    {orderMode && (
+                        <div className="bg-[#f5e9e0] mt-4 border-orange-200 p-4 sm:p-6 rounded-2xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto">
+                            <h3 className="text-lg sm:text-xl xl:text-2xl font-semibold text-orange-600 mb-3">Method of your order?</h3>
+                            <ul className="space-y-2 mb-3">
+                                <li>
+                                    <button
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setOrderMode('dineIn')}
+                                    >
+                                        Dine In
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setOrderMode('pickup')}
+                                    >
+                                        Pickup
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setOrderMode('delivery')}
+                                    >
+                                        Delivery
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </CSSTransition>
 
             {/* Mobile Bottom Cart */}
             {showCart && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto lg:hidden">
-                    <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
-                    <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
-                        {cart.map(item => (
-                            <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
-                                <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
-                                <div className="flex items-center gap-2">
-                                    <span className="font-medium">₹ {item.price * item.quantity}</span>
+                <>
+                    <div className="fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_24px_rgba(251,146,60,0.10)] border-t border-orange-200 z-50 p-4 sm:p-6 rounded-t-3xl transition-all duration-300 transform translate-y-0 max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto lg:hidden">
+                        <h3 className="text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3">Your Order</h3>
+                        <ul className="space-y-2 mb-3 max-h-40 overflow-y-auto pr-2">
+                            {cart.map(item => (
+                                <li key={item._id} className="flex justify-between items-center text-sm sm:text-base xl:text-lg">
+                                    <span className="truncate">{item.itemName} <span className="font-semibold text-orange-600">x {item.quantity}</span></span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-medium">₹ {item.price * item.quantity}</span>
+                                        <button
+                                            onClick={() => removeFromCart(item._id)}
+                                            className="p-1 rounded-full hover:bg-orange-100 transition"
+                                            aria-label="Remove"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" stroke="#fb923c" strokeWidth="2" />
+                                                <path d="M16 12H8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
+                            <span>Total</span>
+                            <span>₹ {totalAmount}</span>
+                        </div>
+                        <button
+                            onClick={() => setOrderMode(prev => !prev)}
+                            className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                        >
+                            Order Now
+                        </button>
+                        <div
+                            className={`transition-all duration-500 ease-in-out overflow-hidden ${orderMode ? 'max-h-96 opacity-100 mt-4' : 'max-h-0 opacity-0'
+                                } bg-[#f5e9e0] z-50 p-4 sm:p-6 rounded-t-3xl max-w-full sm:max-w-md xl:max-w-2xl 2xl:max-w-3xl mx-auto lg:hidden`}
+                        >
+                            {orderMode && <h3 className={`text-lg sm:text-xl xl:text-2xl font-bold text-orange-600 mb-3`}>
+                                How would you like to receive your order?
+                            </h3>}
+                            <ul className="space-y-2 mb-3">
+                                <li>
                                     <button
-                                        onClick={() => removeFromCart(item._id)}
-                                        className="p-1 rounded-full hover:bg-orange-100 transition"
-                                        aria-label="Remove"
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setSelectedOrderType('dineIn')}
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" stroke="#fb923c" strokeWidth="2" />
-                                            <path d="M16 12H8" stroke="#fb923c" strokeWidth="2" strokeLinecap="round" />
-                                        </svg>
+                                        Dine In
                                     </button>
-                                </div>
-                            </li>
-                        ))}
-                    </ul>
-                    <div className="flex justify-between font-semibold text-base sm:text-lg xl:text-xl text-gray-800 mb-3">
-                        <span>Total</span>
-                        <span>₹ {totalAmount}</span>
+                                </li>
+                                <li>
+                                    <button
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setSelectedOrderType('pickup')}
+                                    >
+                                        Pickup
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        className="w-full bg-orange-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
+                                        onClick={() => setSelectedOrderType('delivery')}
+                                    >
+                                        Delivery
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                    <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
-                        Order Now
-                    </button>
-                </div>
+
+                </>
             )}
         </div>
     );

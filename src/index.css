@@ -29,3 +29,15 @@ body {
   opacity: 0;
   transition: transform 500ms ease-in-out, opacity 500ms ease-in-out;
 }
+
+.smooth-expand {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+.smooth-expand.open {
+  max-height: 500px; /* set this higher if needed */
+  opacity: 1;
+}

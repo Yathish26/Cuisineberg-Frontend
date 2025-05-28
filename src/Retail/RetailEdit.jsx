@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Loading from "../Components/Loading";
+import { useNavigate } from "react-router-dom";
 
 export default function RetailEdit() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -14,7 +16,10 @@ export default function RetailEdit() {
     mobileNumber: "",
   });
   const [editable, setEditable] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" }); // For success or error messages
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState({ text: "", type: "" });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchRestaurantInfo = async () => {
@@ -38,7 +43,10 @@ export default function RetailEdit() {
         });
       } else {
         setMessage({ text: "Error fetching profile.", type: "error" });
+        localStorage.removeItem("retailtoken");
+        navigate("/retail/login");
       }
+      setLoading(false);
     };
     fetchRestaurantInfo();
   }, []);
@@ -89,13 +97,26 @@ export default function RetailEdit() {
     }
   };
 
+  if (loading) {
+    return (
+      <Loading />
+    );
+  }
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-100 flex items-center justify-center py-10 px-4">
       <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-2xl p-10 border border-orange-100">
         <div className="flex items-center mb-8">
           <div className="bg-orange-100 rounded-full p-3 mr-4">
-            <svg className="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 11c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4zm0 0c0-2.21-1.79-4-4-4s-4 1.79-4 4 1.79 4 4 4 4-1.79 4-4zm0 0v8" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/office-chair-stroke-rounded.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="#f97316">
+              <path d="M16 22C14.934 20.7553 13.5337 20 12 20C10.4663 20 9.06603 20.7553 8 22" stroke="#f97316" stroke-width="1.5" stroke-linecap="round"></path>
+              <path d="M12 13C10.7319 13 9.39109 13.2193 8.34002 13.5128C7.54859 13.7338 6.91195 14.7415 7.00999 15.5596C7.04632 15.8627 7.30731 16 7.58173 16H16.4183C16.6927 16 16.9537 15.8627 16.99 15.5596C17.0881 14.7415 16.4514 13.7338 15.66 13.5128C14.6089 13.2193 13.2681 13 12 13Z" stroke="#f97316" stroke-width="1.5" stroke-linecap="round"></path>
+              <path d="M21 10C19.8954 10 19 10.8954 19 12V13C19 14.1046 18.1046 15 17 15" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M3 10C4.10457 10 5 10.8954 5 12V13C5 14.1046 5.89543 15 7 15" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M12 16V22" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M12.8197 10H11.1803C9.77811 10 9.07704 10 8.56988 9.57641C8.06272 9.15282 7.89268 8.42526 7.55261 6.97014C7.01792 4.68228 6.75058 3.53835 7.31199 2.76918C7.87341 2 8.97569 2 11.1803 2H12.8197C15.0243 2 16.1266 2 16.688 2.76918C17.2494 3.53835 16.9821 4.68228 16.4474 6.97014C16.1073 8.42526 15.9373 9.15282 15.4301 9.57641C14.923 10 14.2219 10 12.8197 10Z" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M12 10V13" stroke="#f97316" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
           </div>
           <h2 className="text-3xl font-bold text-orange-700 tracking-tight">Edit Restaurant Profile</h2>
@@ -104,11 +125,10 @@ export default function RetailEdit() {
         {/* Display Message */}
         {message.text && (
           <div
-            className={`mb-6 p-3 rounded-lg text-center font-medium shadow-sm ${
-              message.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
-            }`}
+            className={`mb-6 p-3 rounded-lg text-center font-medium shadow-sm ${message.type === "success"
+              ? "bg-green-50 text-green-700 border border-green-200"
+              : "bg-red-50 text-red-700 border border-red-200"
+              }`}
           >
             {message.text}
           </div>
@@ -124,9 +144,8 @@ export default function RetailEdit() {
               value={restaurantInfo.name}
               onChange={handleInputChange}
               disabled={!editable}
-              className={`mt-1 block w-full rounded-lg border ${
-                editable ? "border-orange-300" : "border-gray-200"
-              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+              className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
               placeholder="Enter owner's name"
             />
           </div>
@@ -138,9 +157,8 @@ export default function RetailEdit() {
               value={restaurantInfo.email}
               onChange={handleInputChange}
               disabled={!editable}
-              className={`mt-1 block w-full rounded-lg border ${
-                editable ? "border-orange-300" : "border-gray-200"
-              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+              className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
               placeholder="Enter email"
             />
           </div>
@@ -152,9 +170,8 @@ export default function RetailEdit() {
               value={restaurantInfo.restaurantName}
               onChange={handleInputChange}
               disabled={!editable}
-              className={`mt-1 block w-full rounded-lg border ${
-                editable ? "border-orange-300" : "border-gray-200"
-              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+              className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
               placeholder="Enter restaurant name"
             />
           </div>
@@ -171,9 +188,8 @@ export default function RetailEdit() {
               value={restaurantInfo.restaurantAddress.street}
               onChange={handleInputChange}
               disabled={!editable}
-              className={`mt-1 block w-full rounded-lg border ${
-                editable ? "border-orange-300" : "border-gray-200"
-              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+              className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
               placeholder="Street address"
             />
           </div>
@@ -186,9 +202,8 @@ export default function RetailEdit() {
                 value={restaurantInfo.restaurantAddress.city}
                 onChange={handleInputChange}
                 disabled={!editable}
-                className={`mt-1 block w-full rounded-lg border ${
-                  editable ? "border-orange-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+                className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
                 placeholder="City"
               />
             </div>
@@ -200,9 +215,8 @@ export default function RetailEdit() {
                 value={restaurantInfo.restaurantAddress.state}
                 onChange={handleInputChange}
                 disabled={!editable}
-                className={`mt-1 block w-full rounded-lg border ${
-                  editable ? "border-orange-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+                className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
                 placeholder="State"
               />
             </div>
@@ -215,9 +229,8 @@ export default function RetailEdit() {
               value={restaurantInfo.restaurantAddress.zipCode}
               onChange={handleInputChange}
               disabled={!editable}
-              className={`mt-1 block w-full rounded-lg border ${
-                editable ? "border-orange-300" : "border-gray-200"
-              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+              className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
               placeholder="Zip code"
             />
           </div>
@@ -232,9 +245,8 @@ export default function RetailEdit() {
             value={restaurantInfo.mobileNumber}
             onChange={handleInputChange}
             disabled={!editable}
-            className={`mt-1 block w-full rounded-lg border ${
-              editable ? "border-orange-300" : "border-gray-200"
-            } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
+            className={`mt-1 block w-full rounded-lg border ${editable ? "border-orange-300" : "border-gray-200"
+              } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition`}
             placeholder="Mobile number"
           />
         </div>

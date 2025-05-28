@@ -33,7 +33,7 @@ function App() {
           <Route path='/admin/retail/:id' element={<RetailAdmin />} />
           <Route path='/retail/login' element={<RetailLogin />} />
           <Route path='/retail/register' element={<RetailRegister />} />
-          <Route path='/retail/dashboard' element={<Retail />} />
+          <Route path='/retail' element={<Retail />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
         </Routes>
       </Router>

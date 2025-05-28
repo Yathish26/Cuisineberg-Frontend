@@ -9,7 +9,7 @@ export default function RetailLogin() {
   useEffect(() => {
     const token = localStorage.getItem('retailtoken');
     if (token) {
-      navigate('/retail/dashboard');
+      navigate('/retail');
     }
   }, [navigate]);
 
@@ -30,7 +30,7 @@ export default function RetailLogin() {
 
       if (res.ok && data.token) {
         localStorage.setItem('retailtoken', data.token);
-        navigate('/retail/dashboard');
+        navigate('/retail');
       } else {
         throw new Error(data.error || 'Login failed');
       }
@@ -70,7 +70,7 @@ export default function RetailLogin() {
               autoComplete="username"
               value={formData.email}
               onChange={handleChange}
-              placeholder="you@email.com"
+              placeholder="Email"
               className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-400 bg-[#fffdf9] transition"
             />
           </div>
