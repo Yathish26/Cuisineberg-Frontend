@@ -9,7 +9,8 @@ export default function Inventory() {
     const [editName, setEditName] = useState('');
     const [editPhotoURLs, setEditPhotoURLs] = useState(['']);
     const [hoveredId, setHoveredId] = useState(null);
-    const [search,setSearch] = useState('');
+    const [search, setSearch] = useState('');
+    const [showNoPhotosFirst, setShowNoPhotosFirst] = useState(false);
 
     useEffect(() => {
         fetchItems();
@@ -73,6 +74,10 @@ export default function Inventory() {
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
+    const displayItems = showNoPhotosFirst
+        ? filteredItems.filter(item => !item.photos || item.photos.length === 0)
+        : filteredItems;
+
     return (
         <div className="p-4 max-w-4xl mx-auto">
             <h2 className="text-xl font-bold mb-4 text-orange-600">Inventory</h2>
@@ -131,9 +136,26 @@ export default function Inventory() {
                 />
             </div>
 
+            <label className="flex items-center my-4 cursor-pointer">
+                <div className="relative">
+                    <input
+                        type="checkbox"
+                        checked={showNoPhotosFirst}
+                        onChange={() => setShowNoPhotosFirst(v => !v)}
+                        className="sr-only"
+                    />
+                    <div className={`block w-14 h-8 rounded-full transition-colors duration-300 ${showNoPhotosFirst ? "bg-green-500" : "bg-gray-300"}`}></div>
+                    <div className={`dot absolute top-1 left-1 w-6 h-6 rounded-full bg-white transition-transform duration-300 transform ${showNoPhotosFirst ? "translate-x-6" : ""}`}></div>
+                </div>
+                <span className="ml-3 text-gray-800 font-medium">
+                    No Photos
+                </span>
+            </label>
+
+
             {/* Inventory Items */}
             <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
-                {filteredItems.map((item) => (
+                {displayItems.map((item) => (
                     <div
                         key={item._id}
                         className="bg-white border border-orange-100 rounded-lg shadow-sm break-inside-avoid p-2 relative"
@@ -172,7 +194,7 @@ export default function Inventory() {
                 ))}
             </div>
 
-            
+
 
             {/* Edit Modal */}
             {editingId && (
