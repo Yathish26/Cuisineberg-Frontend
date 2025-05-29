@@ -15,6 +15,7 @@ import Order from "./Order";
 import UserOrder from "./UserOrder";
 import Works from "./Works";
 import Inventory from "./Inventory";
+import Checkout from "./Checkout";
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
           <Route path='/retail' element={<Retail />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
           <Route path="/inventory" element={<Inventory />} />
+          <Route path="/checkout" element={<Checkout />} />
         </Routes>
       </Router>
     </>

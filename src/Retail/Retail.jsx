@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../Components/Loading';
+import Svg from '../Components/Svgvault';
 
 export default function Retail() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -67,6 +68,8 @@ export default function Retail() {
   const [editButton, setEditButton] = useState(false);
 
   const [loading, setLoading] = useState(true);
+  const [photoDiv, setDiv] = useState(false);
+  const [isPhotoLibraryOpen, setIsPhotoLibraryOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -276,6 +279,129 @@ export default function Retail() {
     localStorage.removeItem('retailtoken');
     navigate('/retail/login');
   };
+
+  const ImageLibrary = () => {
+  const [items, setItems] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/items`);
+        const data = await response.json();
+        setItems(data);
+      } catch (error) {
+        console.error("Error fetching items:", error);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
+  const filteredItems = items.filter((item) =>
+    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleConfirm = () => {
+    setEditItemPhoto(selectedImage);
+    setIsPhotoLibraryOpen(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center"
+      onWheel={(e) => e.stopPropagation()}
+    >
+      {/* Main Modal */}
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100 relative">
+        <div className="flex justify-between mb-6 items-center">
+          <h2 className="text-2xl font-bold text-orange-600">Search Item Image</h2>
+          <svg
+            onClick={() => setIsPhotoLibraryOpen(false)}
+            className="cursor-pointer"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            role="img"
+          >
+            <path
+              fillRule="evenodd"
+              clipRule="evenodd"
+              d="M12 10.2623L18.0123 4.25L19.75 5.98775L13.7377 12L19.75 18.0123L18.0123 19.75L12 13.7377L5.98775 19.75L4.25 18.0123L10.2623 12L4.25 5.98775L5.98775 4.25L12 10.2623Z"
+              fill="#f5a623"
+            />
+          </svg>
+        </div>
+
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+        />
+
+        <div className="grid grid-cols-2 gap-4 h-64 overflow-y-auto pr-2">
+          {filteredItems.map((item, index) => {
+            const primaryPhoto = item.photos?.[0];
+            const extraCount = item.photos?.length > 1 ? item.photos.length - 1 : 0;
+
+            return (
+              <div
+                key={index}
+                className="relative bg-gray-100 p-2 rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                onClick={() => setSelectedImage(primaryPhoto)}
+              >
+                <img
+                  src={primaryPhoto}
+                  alt={item.name}
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                {extraCount > 0 && (
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                    +{extraCount}
+                  </div>
+                )}
+                <p className="text-gray-700 text-sm text-center mt-2">{item.name}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Confirmation Popup */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-60 bg-black/40 flex items-center justify-center">
+          <div className="bg-white rounded-xl p-6 shadow-lg text-center max-w-xs w-full">
+            <p className="text-lg font-semibold mb-4">Select this picture?</p>
+            <img
+              src={selectedImage}
+              alt="Selected"
+              className="w-full h-40 object-cover rounded-lg mb-4"
+            />
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
   if (loading) {
     return (
@@ -539,7 +665,8 @@ export default function Retail() {
           </div>
         )}
         {isEditing && (
-          <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
+          <div className={`fixed inset-0 z-50 bg-black/30 flex items-center justify-center
+          transform transition-transform duration-300 ease-in-out pointer-events-none"}`}>
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
               <h2 className="text-2xl font-bold text-orange-600 mb-6">Edit Menu Item</h2>
               <input
@@ -556,13 +683,25 @@ export default function Retail() {
                 onChange={(e) => setEditItemPrice(e.target.value)}
                 className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
               />
-              <input
-                type="text"
-                placeholder="Photo URL (optional)"
-                value={editItemPhoto}
-                onChange={(e) => setEditItemPhoto(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              />
+              <button
+                onClick={() => setDiv(!photoDiv)}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
+                Add a Photo
+              </button>
+              {photoDiv &&
+                <div className="border border-gray-200 rounded-lg p-4 mb-6 flex flex-col items-center">
+                  <input
+                    type="text"
+                    placeholder="Photo URL (optional)"
+                    value={editItemPhoto}
+                    onChange={(e) => setEditItemPhoto(e.target.value)}
+                    className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  />
+                  <h3 className="text-lg text-gray-400 mb-2">OR</h3>
+                  <button onClick={() => setIsPhotoLibraryOpen(true)} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
+                    Select a Photo from Libraries
+                  </button>
+                </div>}
               {/* Food Category Dropdown */}
               <select
                 value={editingItem?.foodCategory || ''}
@@ -629,6 +768,7 @@ export default function Retail() {
             </div>
           </div>
         )}
+        {isPhotoLibraryOpen && <ImageLibrary />}
         {isDeleting && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
