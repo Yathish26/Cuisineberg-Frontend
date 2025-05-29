@@ -9,6 +9,7 @@ export default function Inventory() {
     const [editName, setEditName] = useState('');
     const [editPhotoURLs, setEditPhotoURLs] = useState(['']);
     const [hoveredId, setHoveredId] = useState(null);
+    const [search,setSearch] = useState('');
 
     useEffect(() => {
         fetchItems();
@@ -68,6 +69,10 @@ export default function Inventory() {
         fetchItems();
     };
 
+    const filteredItems = items.filter(item =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <div className="p-4 max-w-4xl mx-auto">
             <h2 className="text-xl font-bold mb-4 text-orange-600">Inventory</h2>
@@ -115,9 +120,20 @@ export default function Inventory() {
                 </button>
             </div>
 
+            {/* Search Bar */}
+            <div className="mb-6">
+                <input
+                    type="text"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-md"
+                    placeholder="Search items..."
+                />
+            </div>
+
             {/* Inventory Items */}
             <div className="columns-2 sm:columns-3 md:columns-4 gap-3 space-y-3">
-                {items.map((item) => (
+                {filteredItems.map((item) => (
                     <div
                         key={item._id}
                         className="bg-white border border-orange-100 rounded-lg shadow-sm break-inside-avoid p-2 relative"
