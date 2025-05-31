@@ -7,7 +7,6 @@ export default function Checkout() {
   const [deliveryMode, setDeliveryMode] = useState('');
   const [pickupTime, setPickupTime] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('UPI');
   const { publicCode } = useParams();
 
   useEffect(() => {
@@ -22,28 +21,26 @@ export default function Checkout() {
     0
   );
 
-  const isReadyToPay =
+  const isReadyToOrder =
     mobileNumber &&
     deliveryMode &&
-    (deliveryMode === 'Pickup' ? pickupTime : deliveryAddress) &&
-    paymentMethod;
+    (deliveryMode === 'Pickup' ? pickupTime : deliveryAddress);
 
-  const handlePay = () => {
+  const handleOrder = () => {
     const details = {
       mobileNumber,
       deliveryMode,
       ...(deliveryMode === 'Pickup' && { pickupTime }),
       ...(deliveryMode === 'Delivery' && { deliveryAddress }),
-      paymentMethod,
       total,
     };
-    alert(`Paid ₹${total} via ${paymentMethod}\nDetails:\n${JSON.stringify(details, null, 2)}`);
+    alert(`Order Placed Successfully\nDetails:\n${JSON.stringify(details, null, 2)}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-6 space-y-6">
-        <h2 className="text-2xl font-bold text-orange-600 text-center">Checkout</h2>
+      <div className="bg-white  shadow-xl w-full max-w-md p-6 space-y-6">
+        <h2 className="text-2xl font-bold text-blue-600 text-center">Checkout</h2>
 
         {cartItems.length === 0 ? (
           <p className="text-center text-gray-500">Your cart is empty.</p>
@@ -56,7 +53,7 @@ export default function Checkout() {
                   <span className="text-gray-800 font-medium">
                     {item.itemName} {item.quantity > 1 && `×${item.quantity}`}
                   </span>
-                  <span className="text-orange-600 font-semibold">
+                  <span className="text-blue-600 font-semibold">
                     ₹{item.price * (item.quantity || 1)}
                   </span>
                 </div>
@@ -72,7 +69,7 @@ export default function Checkout() {
                 placeholder="Enter your mobile number"
                 value={mobileNumber}
                 onChange={(e) => setMobileNumber(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-2 border border-gray-300 "
               />
             </div>
 
@@ -84,10 +81,10 @@ export default function Checkout() {
                   <button
                     key={mode}
                     onClick={() => setDeliveryMode(mode)}
-                    className={`w-1/2 p-2 rounded-lg text-center font-semibold ${
+                    className={`w-1/2 p-2  text-center font-semibold ${
                       deliveryMode === mode
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-orange-100 text-orange-600'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-blue-100 text-blue-600'
                     }`}
                   >
                     {mode}
@@ -104,7 +101,7 @@ export default function Checkout() {
                   type="time"
                   value={pickupTime}
                   onChange={(e) => setPickupTime(e.target.value)}
-                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  className="w-full p-2 border border-gray-300 "
                 />
               </div>
             )}
@@ -116,43 +113,29 @@ export default function Checkout() {
                   value={deliveryAddress}
                   onChange={(e) => setDeliveryAddress(e.target.value)}
                   placeholder="Enter delivery address"
-                  className="w-full p-2 border border-gray-300 rounded-lg"
+                  className="w-full p-2 border border-gray-300 "
                   rows={3}
                 />
               </div>
             )}
 
-            {/* Payment Method Selection */}
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Select Payment Method</label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
-              >
-                <option>UPI</option>
-                <option>Cash</option>
-                <option>Card</option>
-              </select>
-            </div>
-
             {/* Total */}
             <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
               <span>Total</span>
-              <span className="text-orange-600">₹{total}</span>
+              <span className="text-blue-600">₹{total}</span>
             </div>
 
-            {/* Pay Now Button */}
+            {/* Order Now Button */}
             <button
-              onClick={handlePay}
-              disabled={!isReadyToPay}
-              className={`w-full font-bold py-2 px-4 rounded-full shadow-md transition duration-300 ${
-                isReadyToPay
-                  ? 'bg-orange-500 hover:bg-orange-600 text-white'
+              onClick={handleOrder}
+              disabled={!isReadyToOrder}
+              className={`w-full font-bold py-2 px-4 shadow-md transition duration-300 ${
+                isReadyToOrder
+                  ? 'bg-blue-500 hover:bg-blue-600 text-white'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              Pay Now
+              Order Now
             </button>
           </>
         )}

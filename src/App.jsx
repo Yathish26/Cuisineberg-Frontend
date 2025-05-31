@@ -16,6 +16,7 @@ import UserOrder from "./UserOrder";
 import Works from "./Works";
 import Inventory from "./Inventory";
 import Checkout from "./Checkout";
+import Profile from "./Profile";
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
           <Route path='/retail/edit' element={<RetailEdit />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/checkout/:publicCode" element={<Checkout />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </>

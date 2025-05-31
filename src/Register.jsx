@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 export default function Register() {
     const [form, setForm] = useState({ name: '', email: '', password: '' });
     const [errors, setErrors] = useState({});
+    const [message, setMessage] = useState({ text: '', type: '' }); // type: 'success' or 'error'
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.id]: e.target.value });
+        setMessage({ text: '', type: '' }); // Clear message when typing
     };
 
     const validate = () => {
@@ -19,13 +21,33 @@ export default function Register() {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
         setErrors(validationErrors);
+
         if (Object.keys(validationErrors).length === 0) {
-            // Submit logic here
-            alert('Registered successfully!');
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(form),
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    setMessage({ text: data.message || 'Registration failed!', type: 'error' });
+                } else {
+                    setMessage({ text: 'Registered successfully!', type: 'success' });
+                    setForm({ name: '', email: '', password: '' });
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                setMessage({ text: 'Something went wrong. Please try again later.', type: 'error' });
+            }
         }
     };
 
@@ -76,6 +98,17 @@ export default function Register() {
                         />
                         {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
                     </div>
+
+                    {message.text && (
+                        <div
+                            className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-xl ${
+                                message.type === 'success' ? 'text-green-700 bg-green-100 border border-green-300' : 'text-red-700 bg-red-100 border border-red-300'
+                            }`}
+                        >
+                            {message.text}
+                        </div>
+                    )}
+
                     <button
                         type="submit"
                         className="w-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg transition duration-300 text-lg"
