@@ -38,7 +38,7 @@ function App() {
           <Route path='/retail' element={<Retail />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
           <Route path="/inventory" element={<Inventory />} />
-          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/checkout/:publicCode" element={<Checkout />} />
         </Routes>
       </Router>
     </>

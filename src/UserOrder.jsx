@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { CSSTransition } from 'react-transition-group';
 import Loading from './Components/Loading';
@@ -13,8 +13,8 @@ export default function UserOrder() {
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState('');
     const nodeRef = useRef(null);
-    const [pickupTime, setPickupTime] = useState('');
-    const [paymentType, setPaymentType] = useState('');
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         let ignore = false;
@@ -46,6 +46,20 @@ export default function UserOrder() {
         [cart]
     );
 
+    useEffect(() => {
+        const storedCart = localStorage.getItem(publicCode);
+        if (storedCart) {
+            try {
+                const parsedCart = JSON.parse(storedCart);
+                if (Array.isArray(parsedCart)) {
+                    setCart(parsedCart);
+                }
+            } catch (error) {
+                console.error('Failed to parse cart from localStorage:', error);
+            }
+        }
+    }, []);
+
     const addToCart = useCallback((item) => {
         setCart(prevCart => {
             const idx = prevCart.findIndex(i => i._id === item._id);
@@ -66,77 +80,27 @@ export default function UserOrder() {
         );
     }, []);
 
+    const saveCartToLocalStorage = () => {
+        if (Array.isArray(cart) && cart.length > 0) {
+            localStorage.setItem(publicCode, JSON.stringify(cart));
+        }
+        navigate(`/checkout/${publicCode}`);
+
+    };
+
+    useEffect(() => {
+        if (Array.isArray(cart) && cart.length > 0) {
+            localStorage.setItem(publicCode, JSON.stringify(cart));
+        } else if (cart.length === 0) {
+            localStorage.removeItem(publicCode); 
+        }
+    }, [cart]);
+
+
     if (loading) return <Loading />;
     if (!restaurant) return <div className="text-center py-10 text-lg text-red-600">Restaurant not found.</div>;
 
     const showCart = cart.length > 0;
-
-    const Pickup = () => {
-        const handleTimeChange = (e) => {
-            setPickupTime(e.target.value);
-        };
-
-        const handleSubmit = (e) => {
-            e.preventDefault();
-            console.log('Pickup Time:', pickupTime);
-            console.log('Payment Type:', paymentType);
-        };
-        return (
-            <div className="bg-white h-fit mt-4 w-full max-w-md mx-auto p-4 rounded-3xl shadow-xl">
-                <h2 className="text-2xl font-bold text-orange-600 mb-4">🚗 Pickup</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label htmlFor="pickupTime" className="block text-sm font-medium text-gray-700">Pickup Time</label>
-                        <input
-                            type="time"
-                            id="pickupTime"
-                            name="pickupTime"
-                            value={pickupTime}
-                            onChange={handleTimeChange}
-                            required
-                            className="mt-1 block w-full px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
-                        />
-                    </div>
-
-                    {pickupTime && (
-                        <div className="space-y-3">
-                            <div>
-                                <p className="text-sm font-medium text-gray-700 mb-1">Select Payment Type</p>
-                                <div className="flex gap-3">
-                                    <button
-                                        type="button"
-                                        className={`flex-1 py-2 px-4 rounded-full font-semibold shadow-sm text-white transition ${paymentType === 'payNow' ? 'bg-orange-600' : 'bg-orange-500 hover:bg-orange-600'
-                                            }`}
-                                        onClick={() => setPaymentType('payNow')}
-                                    >
-                                        Pay Now
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={`flex-1 py-2 px-4 rounded-full font-semibold shadow-sm text-white transition ${paymentType === 'payAtPickup' ? 'bg-orange-600' : 'bg-orange-500 hover:bg-orange-600'
-                                            }`}
-                                        onClick={() => setPaymentType('payAtPickup')}
-                                    >
-                                        Pay at Pickup
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div>
-                        <button
-                            type="submit"
-                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-full font-bold shadow-md focus:outline-none focus:ring-2 focus:ring-orange-400"
-                        >
-                            Submit
-                        </button>
-                    </div>
-                </form>
-            </div>
-        )
-    }
 
     return (
         <div className={`min-h-screen bg-gradient-to-br from-orange-50 via-yellow-100 to-white text-gray-900 px-2 lg:px-6 py-3 flex gap-4 justify-center lg:pb-0 ${showCart ? 'pb-96' : ''}`}
@@ -162,7 +126,7 @@ export default function UserOrder() {
 
                     {/* Search Bar */}
                     <div className="sticky top-4 z-10 bg-white rounded-xl mb-4 shadow-sm flex items-center px-2 py-1 border border-orange-200">
-                        <Svg icon="search"/>
+                        <Svg icon="search" />
                         <input
                             type="text"
                             placeholder="Search for delicious dishes..."
@@ -261,12 +225,13 @@ export default function UserOrder() {
                             <span>Total</span>
                             <span>₹ {totalAmount}</span>
                         </div>
-                        <button className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
+                        <button
+                            onClick={saveCartToLocalStorage}
+                            className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition">
                             Order Now
                         </button>
-                        
+
                     </div>
-                    <Pickup />
                 </div>
 
             </CSSTransition>
@@ -298,6 +263,7 @@ export default function UserOrder() {
                             <span>₹ {totalAmount}</span>
                         </div>
                         <button
+                            onClick={saveCartToLocalStorage}
                             className="w-full bg-gradient-to-r from-orange-500 to-yellow-400 hover:from-orange-600 hover:to-yellow-500 text-white py-2 rounded-xl text-base sm:text-lg xl:text-xl font-bold shadow transition"
                         >
                             Order Now

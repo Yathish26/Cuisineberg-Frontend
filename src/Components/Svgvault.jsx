@@ -1,10 +1,8 @@
 export default function Svg({ icon, tcss, click }) {
     const svgIcons = {
         location: (
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="#f97316">
-                <path d="M5 16C3.7492 16.6327 3 17.4385 3 18.3158C3 20.3505 7.02944 22 12 22C16.9706 22 21 20.3505 21 18.3158C21 17.4385 20.2508 16.6327 19 16" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M12 10V17" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="6" r="4" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" data-src="https://cdn.hugeicons.com/icons/navigation-03-solid-standard.svg" role="img" color="#f5a623">
+                <path fillRule="evenodd" clipRule="evenodd" d="M19.0617 2.7726C20.3818 2.39544 21.6022 3.6158 21.2252 4.93589L17.1529 19.1934C16.6848 20.8323 14.3885 20.9031 13.8203 19.2962L11.4782 12.6719C11.4531 12.6007 11.3971 12.5447 11.3258 12.5195L4.70211 10.1788C3.09501 9.61087 3.16552 7.31438 4.80443 6.84612L19.0617 2.7726Z" fill="#f5a623"></path>
             </svg>
         ),
         search: (
@@ -14,8 +12,8 @@ export default function Svg({ icon, tcss, click }) {
             </svg>
         ),
         cross: (
-            <svg onClick={click} className={tcss} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" class="injected-svg" data-src="https://cdn.hugeicons.com/icons/cancel-01-solid-sharp.svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" color="#f5a623">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 10.2623L18.0123 4.25L19.75 5.98775L13.7377 12L19.75 18.0123L18.0123 19.75L12 13.7377L5.98775 19.75L4.25 18.0123L10.2623 12L4.25 5.98775L5.98775 4.25L12 10.2623Z" fill="#f5a623"></path>
+            <svg onClick={click} className={tcss} xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" data-src="https://cdn.hugeicons.com/icons/cancel-01-solid-sharp.svg" role="img" color="#f5a623">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 10.2623L18.0123 4.25L19.75 5.98775L13.7377 12L19.75 18.0123L18.0123 19.75L12 13.7377L5.98775 19.75L4.25 18.0123L10.2623 12L4.25 5.98775L5.98775 4.25L12 10.2623Z" fill="#f5a623"></path>
             </svg>
         ),
         vegetarian: (
