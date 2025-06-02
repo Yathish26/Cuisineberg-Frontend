@@ -52,9 +52,9 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-100 via-white to-red-200">
-            <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-2xl border border-red-100">
-                <h2 className="text-3xl font-bold text-red-600 mb-8 text-center tracking-tight">Create Account</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200">
+            <div className="max-w-md w-full bg-white p-8 shadow-2xl border border-blue-100">
+                <h2 className="text-3xl font-bold text-blue-600 mb-8 text-center tracking-tight">Create Account</h2>
                 <form onSubmit={handleSubmit} autoComplete="off">
                     <div className="mb-6">
                         <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
@@ -65,10 +65,10 @@ export default function Register() {
                             id="name"
                             value={form.name}
                             onChange={handleChange}
-                            className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full p-3 border  focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.name ? 'border-blue-400' : 'border-gray-200'}`}
                             placeholder="Enter your name"
                         />
-                        {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
+                        {errors.name && <span className="text-xs text-blue-500">{errors.name}</span>}
                     </div>
                     <div className="mb-6">
                         <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
@@ -79,10 +79,10 @@ export default function Register() {
                             id="email"
                             value={form.email}
                             onChange={handleChange}
-                            className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full p-3 border  focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.email ? 'border-blue-400' : 'border-gray-200'}`}
                             placeholder="Enter your email"
                         />
-                        {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
+                        {errors.email && <span className="text-xs text-blue-500">{errors.email}</span>}
                     </div>
                     <div className="mb-6">
                         <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
@@ -93,7 +93,7 @@ export default function Register() {
                             id="password"
                             value={form.password}
                             onChange={handleChange}
-                            className={`w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400 transition ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
+                            className={`w-full p-3 border  focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.password ? 'border-blue-400' : 'border-gray-200'}`}
                             placeholder="Create a password"
                         />
                         {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
@@ -101,8 +101,8 @@ export default function Register() {
 
                     {message.text && (
                         <div
-                            className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-xl ${
-                                message.type === 'success' ? 'text-green-700 bg-green-100 border border-green-300' : 'text-red-700 bg-red-100 border border-red-300'
+                            className={`mb-4 text-sm font-medium text-center px-4 py-2  ${
+                                message.type === 'success' ? 'text-green-700 bg-green-100 border border-green-300' : 'text-blue-700 bg-blue-100 border border-blue-300'
                             }`}
                         >
                             {message.text}
@@ -111,7 +111,7 @@ export default function Register() {
 
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg transition duration-300 text-lg"
+                        className="w-full bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white py-3 px-4  font-semibold shadow-lg transition duration-300 text-lg"
                     >
                         Register
                     </button>
@@ -119,7 +119,7 @@ export default function Register() {
                 <p className="mt-6 text-sm text-gray-600 text-center">
                     Already have an account?{' '}
                     <Link to="/login">
-                        <span className="text-red-500 hover:underline font-semibold cursor-pointer">
+                        <span className="text-blue-500 hover:underline font-semibold cursor-pointer">
                             Login
                         </span>
                     </Link>

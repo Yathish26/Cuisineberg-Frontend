@@ -9,7 +9,7 @@ export default function RetailRegister() {
         restaurantAddress: { street: '', city: '', state: '', zipCode: '', country: '' }
     });
 
-    const inputClass = "w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white";
+    const inputClass = "w-full p-3 border  focus:outline-none focus:ring-2 focus:ring-red-500 bg-white";
     const labelClass = "block text-sm font-medium text-gray-700";
 
     const handleChange = (e) => {
@@ -36,13 +36,13 @@ export default function RetailRegister() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-rose-100 via-rose-50 to-white">
-            <div className="max-w-md w-full bg-white/90 p-8 rounded-2xl shadow-2xl border border-rose-100">
-                <h2 className="text-3xl font-bold text-rose-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-white">
+            <div className="max-w-md w-full bg-white/90 p-8 my-4 shadow-2xl border border-blue-100">
+                <h2 className="text-3xl font-bold text-blue-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
                 <p className="text-center text-gray-500 mb-6">Join Cuisineberg and grow your business</p>
 
                 {message && (
-                    <div className={`mb-4 text-center text-sm px-4 py-2 rounded-lg ${message.includes('Error') ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
+                    <div className={`mb-4 text-center text-sm px-4 py-2 ${message.includes('Error') ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
                         {message}
                     </div>
                 )}
@@ -60,7 +60,7 @@ export default function RetailRegister() {
                                 autoComplete={field}
                                 value={formData[field]}
                                 onChange={handleChange}
-                                className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
+                                className={`${inputClass} mt-1 bg-blue-50/50 border-blue-200 focus:ring-blue-400`}
                                 required
                                 placeholder={
                                     field === 'name' ? 'Your Name' :
@@ -85,7 +85,7 @@ export default function RetailRegister() {
                                     autoComplete={field}
                                     value={formData.restaurantAddress[field]}
                                     onChange={handleChange}
-                                    className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
+                                    className={`${inputClass} mt-1 bg-blue-50/50 border-blue-200 focus:ring-blue-400`}
                                     required
                                     placeholder={
                                         field === 'street' ? 'Street Address' :
@@ -108,7 +108,7 @@ export default function RetailRegister() {
                             autoComplete="tel"
                             value={formData.mobileNumber}
                             onChange={handleChange}
-                            className={`${inputClass} mt-1 bg-rose-50/50 border-rose-200 focus:ring-rose-400`}
+                            className={`${inputClass} mt-1 bg-blue-50/50 border-blue-200 focus:ring-blue-400`}
                             required
                             placeholder="e.g. +91 98765 43210"
                         />
@@ -116,7 +116,7 @@ export default function RetailRegister() {
 
                     <button
                         type="submit"
-                        className="w-full bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white py-3 px-4 rounded-xl font-semibold shadow-md transition duration-300 mt-2"
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 font-semibold shadow-md transition duration-300 mt-2"
                     >
                         Register
                     </button>
@@ -124,7 +124,7 @@ export default function RetailRegister() {
 
                 <p className="mt-6 text-sm text-gray-600 text-center">
                     Already have an account?{' '}
-                    <Link to="/retail/login" className="text-rose-600 font-medium hover:underline">Login</Link>
+                    <Link to="/retail/login" className="text-blue-600 font-medium hover:underline">Login</Link>
                 </p>
             </div>
         </div>

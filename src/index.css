@@ -79,8 +79,7 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #fbd38d;
-  /* A shade of orange/yellow */
+  background: #c0d2fb;
   border-radius: 10px;
 }
 

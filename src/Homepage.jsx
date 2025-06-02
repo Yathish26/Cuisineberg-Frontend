@@ -1,19 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Header from './Header';
+import Footer from './Footer';
 
 export default function Homepage() {
   return (
     <div className="bg-[#fffaf0] min-h-screen flex flex-col justify-between">
       {/* Header */}
-      <header className="bg-white shadow fixed w-full z-20">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center">
-          <img src="/cuisine.png" className='w-16 h-16' alt="Logo" />
-          <h1 className="text-3xl font-bold text-red-600 tracking-wide">Cuisineberg</h1>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
-      <section className="pt-28 pb-16 px-4 bg-gradient-to-br from-red-100 to-[#fffaf0] text-center">
+      <section className="pt-28 pb-16 px-4 bg-gradient-to-br from-blue-100 to-[#fffaf0] text-center">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-4">
             Order food right from your phone
@@ -23,37 +20,37 @@ export default function Homepage() {
           </p>
           <div className="flex justify-center gap-4 flex-wrap">
             <Link to="/order">
-              <button className="bg-red-600 text-white px-6 py-3 rounded-full text-lg font-semibold shadow hover:bg-red-700 transition">
+              <button className="bg-blue-600 text-white px-6 py-3 text-lg font-semibold shadow hover:bg-blue-700 transition">
                 Start Ordering
               </button>
             </Link>
             <Link to="/retail/register">
-              <button className="bg-white border border-red-600 text-red-600 px-6 py-3 rounded-full text-lg font-semibold hover:bg-red-50 transition">
+              <button className="bg-white border border-blue-600 text-blue-600 px-6 py-3 text-lg font-semibold hover:bg-blue-50 transition">
                 Register Restaurant
               </button>
             </Link>
           </div>
-          <Link to="/howitworks" className="mt-8 inline-block text-red-600 hover:text-red-700">
+          <Link to="/howitworks" className="mt-8 inline-block text-blue-600 hover:text-blue-700">
             <p className="text-lg font-semibold">Learn how it works</p>
           </Link>
         </div>
       </section>
 
       {/* Features */}
-      <section className="py-16 px-6 bg-[#fffaf0]">
+      <section className="py-16 px-6 bg-gradient-to-br from-blue-100 to-[#fffaf0] ">
         <div className="max-w-5xl mx-auto text-center">
           <h3 className="text-2xl font-bold text-gray-900 mb-10">At Cuisineberg we offer</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition border border-red-100">
-              <h4 className="text-lg font-semibold mb-2 text-red-600">Dine-In Convenience</h4>
+            <div className="bg-white p-6 shadow hover:shadow-md transition border border-blue-100">
+              <h4 className="text-lg font-semibold mb-2 text-blue-600">Dine-In Convenience</h4>
               <p className="text-gray-700 text-sm">Book a table or view a dine-in menu before arriving.</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition border border-red-100">
-              <h4 className="text-lg font-semibold mb-2 text-red-600">Pickup Made Easy</h4>
+            <div className="bg-white p-6 shadow hover:shadow-md transition border border-blue-100">
+              <h4 className="text-lg font-semibold mb-2 text-blue-600">Pickup Made Easy</h4>
               <p className="text-gray-700 text-sm">Order ahead and collect it at your convenience.</p>
             </div>
-            <div className="bg-white p-6 rounded-xl shadow hover:shadow-md transition border border-red-100">
-              <h4 className="text-lg font-semibold mb-2 text-red-600">Delivery (Optional)</h4>
+            <div className="bg-white p-6 shadow hover:shadow-md transition border border-blue-100">
+              <h4 className="text-lg font-semibold mb-2 text-blue-600">Delivery (Optional)</h4>
               <p className="text-gray-700 text-sm">If restaurants support it, get meals at your doorstep.</p>
             </div>
           </div>
@@ -61,22 +58,7 @@ export default function Homepage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-10 px-4 text-center">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-2xl font-semibold mb-4 text-red-500">Cuisineberg</p>
-          <p className="text-sm mb-6">&copy; 2025 Cuisineberg. All rights reserved.</p>
-          <div className="flex justify-center gap-6 text-sm">
-            <Link to="/contact" className="hover:text-red-400">Contact</Link>
-            <Link to="/login" className="hover:text-red-400">Sign In</Link>
-          </div>
-          <p className="mt-6 text-sm">
-            Follow us on{' '}
-            <span className="cursor-pointer hover:text-red-400">Facebook</span>,{' '}
-            <span className="cursor-pointer hover:text-red-400">Twitter</span>, and{' '}
-            <span className="cursor-pointer hover:text-red-400">Instagram</span>.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

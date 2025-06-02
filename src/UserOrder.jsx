@@ -297,6 +297,7 @@ export default function UserOrder() {
                 classNames="cart-sidebar"
                 unmountOnExit
                 nodeRef={nodeRef}
+                appear
             >
                 <div
                     ref={nodeRef}
@@ -312,7 +313,7 @@ export default function UserOrder() {
                                         <span className="font-medium text-gray-700">₹ {item.price * item.quantity}</span>
                                         <button
                                             onClick={() => removeFromCart(item._id)}
-                                            className="p-2 rounded-full hover:bg-blue-100 transition-colors duration-200 text-gray-500 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                            className="p-2 rounded-full hover:bg-blue-100 transition-colors duration-200 text-gray-500 hover:text-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-200"
                                             aria-label="Remove item"
                                         >
                                             <CircleMinus className="w-4 h-4" />
