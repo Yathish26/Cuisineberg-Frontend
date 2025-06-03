@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../Components/Loading';
-import Svg from '../Components/Svgvault';
+import Orders from './Orders';
 
 export default function Retail() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -108,7 +108,7 @@ export default function Retail() {
         publicCode: data.publicCode
       });
 
-      setOrders([]); // Placeholder for orders
+      setOrders(data.orders || []);
     } catch (error) {
       console.error('Error fetching restaurant data:', error);
     } finally {
@@ -572,12 +572,7 @@ export default function Retail() {
           </button>
         </section>
 
-        <section>
-          <div className="bg-white/90 rounded-2xl shadow-xl p-8 border border-orange-100">
-            <h2 className="text-3xl font-bold text-orange-600 mb-6">Orders</h2>
-            <p className="text-gray-500">You can manage orders here in the future.</p>
-          </div>
-        </section>
+        <Orders orders={orders} />
 
         {isAddItemModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
