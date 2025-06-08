@@ -107,8 +107,6 @@ export default function Retail() {
         menu: data.menu || [],
         publicCode: data.publicCode
       });
-
-      setOrders(data.orders || []);
     } catch (error) {
       console.error('Error fetching restaurant data:', error);
     } finally {
@@ -116,8 +114,26 @@ export default function Retail() {
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem('retailtoken');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/orders`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      setOrders(data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
+
   useEffect(() => {
     fetchRestaurantData();
+    fetchOrders();
   }, []);
 
   const filteredMenu = restaurantInfo.menu.filter(item =>
@@ -314,9 +330,9 @@ export default function Retail() {
       onWheel={(e) => e.stopPropagation()}
     >
       {/* Main Modal */}
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100 relative">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-blue-100 relative">
         <div className="flex justify-between mb-6 items-center">
-          <h2 className="text-2xl font-bold text-orange-600">Search Item Image</h2>
+          <h2 className="text-2xl font-bold text-blue-600">Search Item Image</h2>
           <svg
             onClick={() => setIsPhotoLibraryOpen(false)}
             className="cursor-pointer"
@@ -341,7 +357,7 @@ export default function Retail() {
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
         <div className="grid grid-cols-2 gap-4 h-64 overflow-y-auto pr-2">
@@ -391,7 +407,7 @@ export default function Retail() {
               </button>
               <button
                 onClick={handleConfirm}
-                className="px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600"
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
               >
                 Confirm
               </button>
@@ -410,9 +426,9 @@ export default function Retail() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
       {/* Restaurant Info */}
-      <header className="bg-gradient-to-r from-orange-600 to-orange-400 text-white py-6 px-8 shadow-lg rounded-b-3xl">
+      <header className="bg-gradient-to-r from-blue-600 to-blue-400 text-white py-6 px-8 shadow-lg rounded-b-3xl">
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-4xl font-bold tracking-tight mb-1">{restaurantInfo.restaurantName || 'Restaurant Name'}</h1>
@@ -438,21 +454,21 @@ export default function Retail() {
         </div>
       </header>
 
-      <section className="bg-white/80 w-fit mx-4 my-6 rounded-2xl shadow-lg p-8 border border-orange-100">
-        <h2 className="text-2xl font-bold text-orange-600 mb-2">Total Menu Items</h2>
+      <section className="bg-white/80 w-fit mx-4 my-6 rounded-2xl shadow-lg p-8 border border-blue-100">
+        <h2 className="text-2xl font-bold text-blue-600 mb-2">Total Menu Items</h2>
         <p className="text-5xl font-bold text-gray-800">{restaurantInfo.menu.length}</p>
       </section>
 
       <main className="container mx-auto px-4 py-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Menu Section */}
-        <section className="bg-white/90 rounded-2xl shadow-xl p-8 border border-orange-100">
+        <section className="bg-white/90 rounded-2xl shadow-xl p-8 border border-blue-100">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-orange-600">Menu</h2>
+            <h2 className="text-3xl font-bold text-blue-600">Menu</h2>
             <button
               onClick={() => setEditButton(!editButton)}
               className={`${editButton
                 ? 'bg-green-500 hover:bg-green-600'
-                : 'bg-orange-500 hover:bg-orange-600'
+                : 'bg-blue-500 hover:bg-blue-600'
                 } text-white font-semibold py-2 px-6 rounded-lg shadow transition-all duration-200`}
             >
               {editButton ? "Done" : "Edit"}
@@ -520,7 +536,7 @@ export default function Retail() {
               filteredMenu.map((item) => (
                 <li
                   key={item._id}
-                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 px-4 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-100 shadow transition`}
+                  className={`flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 py-4 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-100 shadow transition`}
                 >
                   {item.photoURL && (
                     <img
@@ -534,7 +550,7 @@ export default function Retail() {
                     <span className="text-gray-900 text-lg font-semibold flex-1">
                       {item.itemName}
                     </span>
-                    <span className="text-orange-700 font-bold text-right sm:text-left">
+                    <span className="text-blue-700 font-bold text-right sm:text-left">
                       ₹ {item.price.toFixed(2)}
                     </span>
 
@@ -566,7 +582,7 @@ export default function Retail() {
           </ul>
           <button
             onClick={() => setIsAddItemModalOpen(true)}
-            className="mt-8 w-full bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all duration-200"
+            className="mt-8 w-full bg-gradient-to-r from-blue-500 to-blue-400 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all duration-200"
           >
             + Add Item
           </button>
@@ -576,34 +592,34 @@ export default function Retail() {
 
         {isAddItemModalOpen && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
-              <h2 className="text-2xl font-bold text-orange-600 mb-6">Add Menu Item</h2>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-blue-100">
+              <h2 className="text-2xl font-bold text-blue-600 mb-6">Add Menu Item</h2>
               <input
                 type="text"
                 placeholder="Item Name"
                 value={newItem.itemName}
                 onChange={(e) => setNewItem({ ...newItem, itemName: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <input
                 type="number"
                 placeholder="Price"
                 value={newItem.price}
                 onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <input
                 type="text"
                 placeholder="Photo URL (optional)"
                 value={newItem.photoURL}
                 onChange={(e) => setNewItem({ ...newItem, photoURL: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               {/* Food Category Dropdown */}
               <select
                 value={newItem.foodCategory || ''}
                 onChange={(e) => setNewItem({ ...newItem, foodCategory: e.target.value })}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">Select Food Category</option>
                 {foodCategories.map((cat) => (
@@ -645,7 +661,7 @@ export default function Retail() {
               <div className="flex justify-end gap-3">
                 <button
                   onClick={handleAddItem}
-                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow transition"
                 >
                   Add Item
                 </button>
@@ -662,25 +678,25 @@ export default function Retail() {
         {isEditing && (
           <div className={`fixed inset-0 z-50 bg-black/30 flex items-center justify-center
           transform transition-transform duration-300 ease-in-out pointer-events-none"}`}>
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
-              <h2 className="text-2xl font-bold text-orange-600 mb-6">Edit Menu Item</h2>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-blue-100">
+              <h2 className="text-2xl font-bold text-blue-600 mb-6">Edit Menu Item</h2>
               <input
                 type="text"
                 placeholder="Item Name"
                 value={editItemName}
                 onChange={(e) => setEditItemName(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <input
                 type="number"
                 placeholder="Price"
                 value={editItemPrice}
                 onChange={(e) => setEditItemPrice(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               <button
                 onClick={() => setDiv(!photoDiv)}
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
                 Add a Photo
               </button>
               {photoDiv &&
@@ -690,10 +706,10 @@ export default function Retail() {
                     placeholder="Photo URL (optional)"
                     value={editItemPhoto}
                     onChange={(e) => setEditItemPhoto(e.target.value)}
-                    className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <h3 className="text-lg text-gray-400 mb-2">OR</h3>
-                  <button onClick={() => setIsPhotoLibraryOpen(true)} className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
+                  <button onClick={() => setIsPhotoLibraryOpen(true)} className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 mb-6 px-6 rounded-lg shadow transition">
                     Select a Photo from Libraries
                   </button>
                 </div>}
@@ -703,7 +719,7 @@ export default function Retail() {
                 onChange={(e) =>
                   setEditingItem((prev) => ({ ...prev, foodCategory: e.target.value }))
                 }
-                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full p-3 border border-gray-200 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">Select Food Category</option>
                 {foodCategories.map((cat) => (
@@ -766,8 +782,8 @@ export default function Retail() {
         {isPhotoLibraryOpen && <ImageLibrary />}
         {isDeleting && (
           <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-orange-100">
-              <h2 className="text-2xl font-bold text-orange-600 mb-4">Delete Menu Item</h2>
+            <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-blue-100">
+              <h2 className="text-2xl font-bold text-blue-600 mb-4">Delete Menu Item</h2>
               <p className="mb-6 text-gray-700">Are you sure you want to delete this item?</p>
               <div className="flex justify-end gap-3">
                 <button

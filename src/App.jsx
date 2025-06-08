@@ -14,9 +14,12 @@ import RetailAdmin from "./Admin/AdminRetail";
 import Order from "./Order";
 import UserOrder from "./UserOrder";
 import Works from "./Works";
-import Inventory from "./Inventory";
+import Inventory from "./Admin/Inventory";
 import Checkout from "./Checkout";
-import Profile from "./Profile";
+import Profile from "./User/Profile";
+import Privacy from "./Privacy";
+import Terms from "./Terms";
+import AdminOrders from "./Admin/AdminOrders";
 
 function App() {
 
@@ -34,13 +37,16 @@ function App() {
           <Route path='/admin/login' element={<AdminLogin />} />
           <Route path='/admin/addretail' element={<AddRetail />} />
           <Route path='/admin/retail/:id' element={<RetailAdmin />} />
+          <Route path='/admin/orders' element={<AdminOrders />} />
           <Route path='/retail/login' element={<RetailLogin />} />
           <Route path='/retail/register' element={<RetailRegister />} />
           <Route path='/retail' element={<Retail />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
-          <Route path="/inventory" element={<Inventory />} />
+          <Route path="/admin/inventory" element={<Inventory />} />
           <Route path="/checkout/:publicCode" element={<Checkout />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/privacy-policy" element={<Privacy />} />
+          <Route path="/terms-and-conditions" element={<Terms />} />
         </Routes>
       </Router>
     </>

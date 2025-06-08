@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Pencil, Briefcase, Home, LogOut, MapPin, ShoppingBag, Heart, CreditCard, Settings, Plus, CheckCircle } from 'lucide-react'; // Added CheckCircle
-import Loading from './Components/Loading';
+import Loading from '../Components/Loading';
+import OrderCarts from './OrderCarts';
+import Header from '../Header';
 
 export default function Profile() {
     const [loading, setLoading] = useState(true);
@@ -277,7 +279,8 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100 font-inter">
+        <div className="min-h-screen bg-gray-100">
+            {/* <Header /> */}
             {/* Header Section */}
             <div className="bg-blue-900 text-white p-6 md:p-8 shadow-md">
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -528,12 +531,7 @@ export default function Profile() {
                         // View mode content based on activeTab
                         <>
                             {activeTab === 'orders' && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Orders</h3>
-                                    <p className="text-gray-500">Your orders will be listed here.</p>
-                                    <p className="text-gray-500 mt-4">No Orders</p>
-                                    <p className="text-gray-500">You haven't placed any order yet.</p>
-                                </div>
+                                <OrderCarts />
                             )}
                             {activeTab === 'favourites' && (
                                 <div className="text-center py-12">

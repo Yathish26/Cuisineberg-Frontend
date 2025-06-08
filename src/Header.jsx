@@ -1,4 +1,5 @@
 import { CircleUserRound } from "lucide-react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 
@@ -7,10 +8,14 @@ export default function Header() {
 
     const navigate = useNavigate();
 
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
     return (
-        <header className="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-md fixed w-full z-30 border-b border-blue-100">
+        <header className="bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-md w-full border-b border-blue-100">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+                <div onClick={() => navigate("/")} className="flex cursor-pointer items-center space-x-4">
                     <img
                         src="/cuisine.png"
                         className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg shadow-sm border border-blue-100"

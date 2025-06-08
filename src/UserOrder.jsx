@@ -12,17 +12,17 @@ export default function UserOrder() {
     const [loading, setLoading] = useState(true);
     const [cart, setCart] = useState([]);
     const [search, setSearch] = useState('');
-    const nodeRef = useRef(null); // Ref for desktop cart animation
-    const mobileCartRef = useRef(null); // Ref for mobile cart animation
+    const nodeRef = useRef(null);
+    const mobileCartRef = useRef(null);
     const navigate = useNavigate();
+    const [selectedCategory, setSelectedCategory] = useState(null);
 
     const [itemAddedAnimation, setItemAddedAnimation] = useState(null);
 
     const [isDragging, setIsDragging] = useState(false);
     const [startY, setStartY] = useState(0);
-    const [currentTranslateY, setCurrentTranslateY] = useState(0); // Tracks current drag translation
+    const [currentTranslateY, setCurrentTranslateY] = useState(0);
 
-    // New state to control if the mobile cart is expanded or collapsed to a bar
     const [isMobileCartExpanded, setIsMobileCartExpanded] = useState(true);
 
     const [veg, setVeg] = useState(false);
@@ -49,16 +49,29 @@ export default function UserOrder() {
 
     const filteredMenu = useMemo(() => {
         if (!restaurant) return [];
+
         const s = search.toLowerCase();
-        let filtered = restaurant.menu.filter(item => item.itemName.toLowerCase().includes(s));
+
+        let filtered = restaurant.menu.filter(item =>
+            item.itemName.toLowerCase().includes(s) ||
+            (item.foodCategory?.toLowerCase().includes(s))
+        );
+
         if (veg && !nonVeg) {
             filtered = filtered.filter(item => item.dishType === 'V');
         } else if (!veg && nonVeg) {
             filtered = filtered.filter(item => item.dishType === 'NV');
         }
 
+        if (selectedCategory) {
+            filtered = filtered.filter(item => {
+                const category = item.foodCategory?.trim() || "Other";
+                return category === selectedCategory;
+            });
+        }
+
         return filtered;
-    }, [restaurant, search, veg, nonVeg]);
+    }, [restaurant, search, veg, nonVeg, selectedCategory]);
 
 
     const totalAmount = useMemo(
@@ -114,10 +127,10 @@ export default function UserOrder() {
     useEffect(() => {
         if (Array.isArray(cart) && cart.length > 0) {
             localStorage.setItem(publicCode, JSON.stringify(cart));
-            setIsMobileCartExpanded(true); // Ensure cart is expanded if items exist
+            // REMOVE THIS LINE: setIsMobileCartExpanded(true);
         } else if (cart.length === 0) {
             localStorage.removeItem(publicCode);
-            setIsMobileCartExpanded(false); // Collapse cart if empty
+            setIsMobileCartExpanded(false); // Keep this, as an empty cart should collapse
         }
     }, [cart, publicCode]);
 
@@ -126,16 +139,22 @@ export default function UserOrder() {
         if (e.target.closest('.mobile-cart-handle')) {
             setIsDragging(true);
             setStartY(e.touches[0].clientY);
+
+            // Prevent background scroll during drag
+            document.body.style.overflow = 'hidden';
+            document.body.style.touchAction = 'none';
+
             if (mobileCartRef.current) {
-                mobileCartRef.current.style.transition = 'none'; // Disable CSS transition during drag
+                mobileCartRef.current.style.transition = 'none';
             }
         }
     }, []);
 
+
     const handleTouchMove = useCallback((e) => {
         if (!isDragging) return;
         const diffY = e.touches[0].clientY - startY;
-        const newTranslateY = Math.max(0, diffY); // Only allow pulling down
+        const newTranslateY = Math.max(0, diffY);
         setCurrentTranslateY(newTranslateY);
         if (mobileCartRef.current) {
             mobileCartRef.current.style.transform = `translateY(${newTranslateY}px)`;
@@ -146,21 +165,48 @@ export default function UserOrder() {
         if (!isDragging) return;
 
         if (mobileCartRef.current) {
-            mobileCartRef.current.style.transition = 'transform 0.3s ease-out'; // Re-enable transition
+            mobileCartRef.current.style.transition = 'transform 0.3s ease-out';
         }
 
-        // Determine if cart should collapse or snap back to expanded
-        if (currentTranslateY > 100) { // Threshold for collapsing (e.g., 100px)
-            setIsMobileCartExpanded(false);
+        if (currentTranslateY > 100) {
+            setIsMobileCartExpanded(true);
         } else {
-            setIsMobileCartExpanded(true); // Snap back to expanded
+            setIsMobileCartExpanded(false);
         }
-        setCurrentTranslateY(0); // Reset translation for next drag
+
+        // Reset
+        setCurrentTranslateY(0);
         setIsDragging(false);
+
+        // Re-enable scroll
+        document.body.style.overflow = '';
+        document.body.style.touchAction = '';
     }, [isDragging, currentTranslateY]);
+
 
     // Determines if any cart UI should be shown
     const showCart = cart.length > 0;
+
+    useEffect(() => {
+        const body = document.body;
+
+        if (!isMobileCartExpanded && showCart) {
+            // Prevent scrolling behind the cart
+            body.style.overflow = 'hidden';
+            body.style.touchAction = 'none'; // Prevent gestures like pinch-to-zoom on iOS
+        } else {
+            // Re-enable scrolling
+            body.style.overflow = '';
+            body.style.touchAction = '';
+        }
+
+        return () => {
+            // Clean up on unmount or showCart becoming false
+            body.style.overflow = '';
+            body.style.touchAction = '';
+        };
+    }, [showCart]);
+
 
 
     if (loading) return <Loading />;
@@ -232,61 +278,111 @@ export default function UserOrder() {
                         </button>
                     </div>
 
-                    {/* Menu */}
-                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
-                        {filteredMenu.length > 0 ? filteredMenu.map(item => (
-                            <div
-                                key={item._id}
-                                className={`flex flex-col w-full bg-white p-4 sm:p-5  border border-gray-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out
-                                    ${itemAddedAnimation === item._id ? 'ring-2 ring-blue-400' : ''}`
-                                }
-                            >
-                                {item.photoURL ? (
-                                    <img
-                                        src={item.photoURL}
-                                        alt={item.itemName}
-                                        className="w-full h-36 sm:h-40 xl:h-48 object-cover  bg-gray-50 shadow-sm mb-3 sm:mb-4"
-                                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x200/FEEBC8/DD6B20?text=No+Image`; }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-36 sm:h-40 xl:h-48 flex items-center justify-center rounded-lg bg-blue-100 text-blue-400 text-5xl sm:text-6xl font-bold mb-3 sm:mb-4">
-                                        🍽️
-                                    </div>
-                                )}
 
-                                <div className="flex flex-col flex-grow">
-                                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
-                                        <p className="text-base sm:text-lg font-semibold text-gray-800 flex-1">{item.itemName}</p>
-                                        <div className="flex-shrink-0 ml-2 sm:ml-3">
-                                            {item.dishType === "V" && (
-                                                <span title="Vegetarian">
-                                                    <LeafyGreen className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
-                                                </span>
-                                            )}
-                                            {item.dishType === "NV" && (
-                                                <span title="Non-Vegetarian">
-                                                    <Ham className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <p className="text-lg text-blue-900 font-semibold mb-3 sm:mb-4">₹ {item.price}</p>
-
+                    {/* <div className="w-full max-w-4xl mx-auto overflow-hidden">
+                        <div className="overflow-x-auto scrollbar-hide">
+                            <div className="flex gap-3 whitespace-nowrap w-max">
+                                {[...new Set(
+                                    (restaurant?.menu || []).map(item =>
+                                        item.foodCategory && item.foodCategory.trim() !== ""
+                                            ? item.foodCategory.trim()
+                                            : "Other"
+                                    )
+                                )].map(category => (
                                     <button
-                                        onClick={() => addToCart(item)}
-                                        className="mt-auto flex items-center justify-center gap-1.5 sm:gap-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6 "
+                                        key={category}
+                                        onClick={() =>
+                                            setSelectedCategory(prev => prev === category ? null : category)
+                                        }
+                                        className={`px-4 py-2 rounded-full border font-medium transition duration-200 ${selectedCategory === category
+                                                ? 'bg-blue-600 text-white border-blue-600'
+                                                : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-blue-100'
+                                            }`}
                                     >
-                                        Add
+                                        {category}
                                     </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div> */}
+
+                    {/* Menu */}
+                    {filteredMenu.length > 0 ? (
+                        (() => {
+                            const grouped = filteredMenu.reduce((acc, item) => {
+                                const category = item.foodCategory?.trim() || "Others";
+                                if (!acc[category]) acc[category] = [];
+                                acc[category].push(item);
+                                return acc;
+                            }, {});
+
+                            const sortedCategories = Object.keys(grouped).filter(c => c !== "Others").sort();
+                            if (grouped["Others"]) sortedCategories.push("Others");
+
+                            return sortedCategories.map(category => (
+                                <div key={category} className="mb-10">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-blue-800 mb-4">{category}</h2>
+
+                                    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+                                        {grouped[category].map(item => (
+                                            <div
+                                                key={item._id}
+                                                className={`flex flex-col w-full bg-white p-4 sm:p-5 border border-gray-100 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ease-in-out
+                ${itemAddedAnimation === item._id ? 'ring-2 ring-blue-400' : ''}`}
+                                            >
+                                                {item.photoURL ? (
+                                                    <img
+                                                        src={item.photoURL}
+                                                        alt={item.itemName}
+                                                        className="w-full h-36 sm:h-40 xl:h-48 object-contain bg-gray-50 shadow-sm mb-3 sm:mb-4"
+                                                        onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x200/FEEBC8/DD6B20?text=No+Image`; }}
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-36 sm:h-40 xl:h-48 flex items-center justify-center rounded-lg bg-blue-100 text-blue-400 text-5xl sm:text-6xl font-bold mb-3 sm:mb-4">
+                                                        🍽️
+                                                    </div>
+                                                )}
+
+                                                <div className="flex flex-col flex-grow">
+                                                    <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                                                        <p className="text-base sm:text-lg font-semibold text-gray-800 flex-1">{item.itemName}</p>
+                                                        <div className="flex-shrink-0 ml-2 sm:ml-3">
+                                                            {item.dishType === "V" && (
+                                                                <span title="Vegetarian">
+                                                                    <LeafyGreen className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                                                                </span>
+                                                            )}
+                                                            {item.dishType === "NV" && (
+                                                                <span title="Non-Vegetarian">
+                                                                    <Ham className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-lg text-blue-900 font-semibold mb-3 sm:mb-4">₹ {item.price}</p>
+
+                                                    <button
+                                                        onClick={() => addToCart(item)}
+                                                        className="mt-auto flex items-center justify-center gap-1.5 sm:gap-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold py-2.5 px-4 sm:py-3 sm:px-6"
+                                                    >
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        )) : (
-                            <div className="w-full h-full col-span-full text-center py-10">
-                                <CookingPot className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-blue-400" />
-                                <p className="text-lg sm:text-lg text-blue-400 py-10 sm:py-12">No items match your search. Try a different query!</p>
-                            </div>
-                        )}
-                    </div>
+                            ));
+                        })()
+                    ) : (
+                        <div className="w-full h-full col-span-full text-center py-10">
+                            <CookingPot className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-blue-400" />
+                            <p className="text-lg sm:text-lg text-blue-400 py-10 sm:py-12">
+                                No items match your search. Try a different query!
+                            </p>
+                        </div>
+                    )}
+
                 </div>
             </div>
 
@@ -344,35 +440,31 @@ export default function UserOrder() {
                     onTouchEnd={handleTouchEnd}
                     style={{ transform: `translateY(${currentTranslateY}px)` }} // Apply dynamic transform
                     className={`fixed bottom-0 left-0 right-0 bg-white shadow-[0_-8px_30px_rgba(255,165,0,0.1)] border-t border-blue-200 z-50 rounded-xl transition-transform duration-300 ease-out max-w-full sm:max-w-xl mx-auto lg:hidden
-                        ${isMobileCartExpanded ? 'h-auto max-h-[80vh] min-h-[10rem]' : 'h-[6rem]'}`
+                        ${isMobileCartExpanded ? 'h-[6rem]' : 'h-auto max-h-[80vh] min-h-[10rem]'}`
                     }
                 >
-                    {/* Pull handle */}
+                    {/* Pull handle - ALWAYS handles expansion/collapse on click */}
                     <div className="mobile-cart-handle flex justify-center py-2 cursor-grab active:cursor-grabbing"
-                        onClick={() => setIsMobileCartExpanded(true)} // Changed to expand cart on click
+                        onClick={() => setIsMobileCartExpanded(!isMobileCartExpanded)} // This is the ONLY place a direct click should toggle the cart
                     >
                         <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
                     </div>
 
                     {/* Collapsed view / Expanded view content */}
                     {!isMobileCartExpanded ? (
-                        <div className="flex justify-between items-center px-4 py-3 sm:px-6 sm:py-4" onClick={() => setIsMobileCartExpanded(true)}> {/* Changed to expand cart on click */}
-                            <h3 className="text-lg sm:text-xl font-bold text-blue-600">
-                                <ShoppingCart className="inline-block w-5 h-5 mr-2" /> View Cart ({cart.length} items)
-                            </h3>
-                            <span className="font-bold text-base sm:text-lg text-gray-800">₹ {totalAmount}</span>
-                        </div>
-                    ) : (
                         <div className="p-4 sm:p-6 pt-0"> {/* Adjusted padding for expanded content */}
-                            <h3 className="text-xl sm:text-2xl font-semibold text-blue-600 mb-4">Your Order</h3>
-                            <ul className="space-y-2 mb-4 max-h-36 overflow-y-auto pr-2 custom-scrollbar">
+                            <h3 className="text-xl sm:text-2xl font-semibold text-blue-600 mb-4 mobile-cart-handle cursor-grab active:cursor-grabbing">Your Order</h3>
+                            <ul className="space-y-2 bg-blue-50 rounded-lg mb-4 max-h-36 overflow-y-auto p-2 custom-scrollbar">
                                 {cart.map(item => (
                                     <li key={item._id} className="flex justify-between items-center text-sm sm:text-base">
                                         <span className="truncate text-gray-800 flex-1 pr-2">{item.itemName} <span className="font-semibold text-blue-600">x {item.quantity}</span></span>
                                         <div className="flex items-center gap-2 flex-shrink-0">
                                             <span className="font-medium text-gray-700">₹ {item.price * item.quantity}</span>
                                             <button
-                                                onClick={() => removeFromCart(item._id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation(); // KEEP THIS!
+                                                    removeFromCart(item._id);
+                                                }}
                                                 className="p-1.5 rounded-full hover:bg-blue-100 transition-colors duration-200 text-gray-500 hover:text-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                                                 aria-label="Remove item"
                                             >
@@ -388,10 +480,18 @@ export default function UserOrder() {
                             </div>
                             <button
                                 onClick={saveCartToLocalStorage}
-                                className="w-full bg-gradient-to-r from-blue-500 to-blue-500 hover:from-blue-600 hover:to-blue-600 text-white py-3  text-base sm:text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                                className="w-full bg-gradient-to-r from-blue-500 to-blue-500 hover:from-blue-600 hover:to-blue-600 text-white py-3  text-base sm:text-lg font-semibold shadow-lg transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
                             >
                                 <ShoppingCart className="inline-block w-5 h-5 mr-2" /> Proceed to Checkout
                             </button>
+                        </div>
+                    ) : (
+                        // ONLY the collapsed view should have its own onClick to expand
+                        <div onClick={() => setIsMobileCartExpanded(!isMobileCartExpanded)} className="flex justify-between items-center px-4 py-3 sm:px-6 sm:py-4">
+                            <h3 className="text-lg sm:text-xl font-bold text-blue-600">
+                                <ShoppingCart className="inline-block w-5 h-5 mr-2" /> View Cart ({cart.length} items)
+                            </h3>
+                            <span className="font-bold text-base sm:text-lg text-gray-800">₹ {totalAmount}</span>
                         </div>
                     )}
                 </div>

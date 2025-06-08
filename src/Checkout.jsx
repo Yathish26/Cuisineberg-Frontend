@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 
 export default function Checkout() {
   const [cartItems, setCartItems] = useState([]);
-  const [deliveryMode, setDeliveryMode] = useState('');
-  const [pickupTime, setPickupTime] = useState('');
-  const [deliveryAddress, setDeliveryAddress] = useState('');
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -15,9 +12,9 @@ export default function Checkout() {
   const [authSuccess, setAuthSuccess] = useState('');
   const [user, setUser] = useState({ name: '', email: '' });
   const { publicCode } = useParams();
-  const mapRef = useRef(null);
-  const markerRef = useRef(null);
   const [orderbutton, setOrderButton] = useState("Order Now");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedCart = localStorage.getItem(publicCode);
@@ -47,11 +44,9 @@ export default function Checkout() {
       }
     }).catch((error) => {
       console.error('Error fetching user data:', error);
+      localStorage.removeItem('token');
     });
   }, [token]);
-
-  const isReadyToOrder =
-    deliveryMode && (deliveryMode === 'Pickup' ? pickupTime : deliveryAddress);
 
   const handleOrder = async () => {
     const details = {
@@ -59,9 +54,6 @@ export default function Checkout() {
       email: user.email,
       mobileNumber: user.mobileNumber,
       publicCode,
-      deliveryMode,
-      ...(deliveryMode === 'Pickup' ? { pickupTime } : {}),
-      ...(deliveryMode === 'Delivery' ? { deliveryAddress } : {}),
       cartItems,
       total,
     };
@@ -135,63 +127,6 @@ export default function Checkout() {
     }
   };
 
-  // Load Google Maps Script
-  useEffect(() => {
-    if (deliveryMode !== 'Delivery') return;
-
-    const existingScript = document.getElementById('google-maps');
-    if (existingScript) {
-      initMap();
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.id = 'google-maps';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyC_OYiHvy9Oikmrc8PQZXHP4bvTAmgKD34&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = initMap;
-    document.body.appendChild(script);
-  }, [deliveryMode]);
-
-  const initMap = () => {
-    if (!mapRef.current) return;
-
-    const defaultLatLng = { lat: 12.9716, lng: 77.5946 }; // Bangalore default
-
-    const map = new window.google.maps.Map(mapRef.current, {
-      center: defaultLatLng,
-      zoom: 15,
-    });
-
-    map.addListener('click', async (e) => {
-      const { latLng } = e;
-      const lat = latLng.lat();
-      const lng = latLng.lng();
-
-      if (markerRef.current) {
-        markerRef.current.setMap(null);
-      }
-
-      markerRef.current = new window.google.maps.Marker({
-        position: { lat, lng },
-        map,
-      });
-
-      try {
-        const geocoder = new window.google.maps.Geocoder();
-        const response = await geocoder.geocode({ location: { lat, lng } });
-        if (response.results && response.results.length > 0) {
-          setDeliveryAddress(response.results[0].formatted_address);
-        } else {
-          setDeliveryAddress(`Lat: ${lat}, Lng: ${lng}`);
-        }
-      } catch {
-        setDeliveryAddress(`Lat: ${lat}, Lng: ${lng}`);
-      }
-    });
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white shadow-xl w-full max-w-md p-6 space-y-6">
@@ -202,67 +137,19 @@ export default function Checkout() {
             <p className="text-gray-600 mb-4">Please login or register to continue.</p>
             <div className="flex space-x-4 justify-center">
               <button
-                onClick={() => {
-                  setShowAuthForm(true);
-                  setIsLoginMode(true);
-                }}
+                onClick={() => navigate('/login')}
                 className="px-4 py-2 bg-blue-500 text-white font-semibold"
               >
                 Login
               </button>
               <button
-                onClick={() => {
-                  setShowAuthForm(true);
-                  setIsLoginMode(false);
-                }}
+                onClick={() => navigate('/register')}
                 className="px-4 py-2 bg-green-500 text-white font-semibold"
               >
                 Register
               </button>
             </div>
           </div>
-        )}
-
-        {showAuthForm && !token && (
-          <form onSubmit={handleAuth} className="space-y-4">
-            {!isLoginMode && (
-              <input
-                type="text"
-                placeholder="Name"
-                value={authDetails.name}
-                onChange={(e) => setAuthDetails({ ...authDetails, name: e.target.value })}
-                required
-                className="w-full p-2 border border-gray-300"
-              />
-            )}
-            <input
-              type="email"
-              placeholder="Email"
-              value={authDetails.email}
-              onChange={(e) => setAuthDetails({ ...authDetails, email: e.target.value })}
-              required
-              className="w-full p-2 border border-gray-300"
-            />
-            <input
-              type="password"
-              placeholder="Password"
-              value={authDetails.password}
-              onChange={(e) => setAuthDetails({ ...authDetails, password: e.target.value })}
-              required
-              className="w-full p-2 border border-gray-300"
-            />
-            {authError && <p className="text-red-500 text-sm">{authError}</p>}
-            {authSuccess && <p className="text-green-600 text-sm">{authSuccess}</p>}
-            <button type="submit" className="w-full bg-blue-600 text-white py-2 font-semibold">
-              {isLoginMode ? 'Login' : 'Register'}
-            </button>
-            <p
-              onClick={() => setIsLoginMode(!isLoginMode)}
-              className="text-sm text-blue-500 text-center cursor-pointer"
-            >
-              {isLoginMode ? 'Don\'t have an account? Register' : 'Already have an account? Login'}
-            </p>
-          </form>
         )}
 
         {token && cartItems.length === 0 && (
@@ -274,7 +161,8 @@ export default function Checkout() {
             <div className="space-y-4 max-h-64 overflow-y-auto border-b pb-4">
               {cartItems.map((item, index) => (
                 <div key={index} className="flex justify-between items-center">
-                  <span className="text-gray-800 font-medium">
+                  <img src={item.photoURL} alt={item.itemName} className="w-16 h-16 object-cover rounded mr-4" />
+                  <span className="text-gray-800 font-medium flex-1">
                     {item.itemName} {item.quantity > 1 && `×${item.quantity}`}
                   </span>
                   <span className="text-blue-600 font-semibold">
@@ -284,53 +172,6 @@ export default function Checkout() {
               ))}
             </div>
 
-            <div className="space-y-2">
-              <h1 className="text-sm font-medium text-gray-700">Mode of Delivery</h1>
-              <div className="flex space-x-4">
-                {['Pickup', 'Delivery'].map((mode) => (
-                  <button
-                    key={mode}
-                    onClick={() => setDeliveryMode(mode)}
-                    className={`w-1/2 p-2 text-center font-semibold ${deliveryMode === mode
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-100 text-blue-600'
-                      }`}
-                  >
-                    {mode}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {deliveryMode === 'Pickup' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Time</label>
-                <input
-                  type="time"
-                  value={pickupTime}
-                  onChange={(e) => setPickupTime(e.target.value)}
-                  className="w-full p-2 border border-gray-300"
-                />
-              </div>
-            )}
-
-            {deliveryMode === 'Delivery' && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Select on Map</label>
-                  <div
-                    ref={mapRef}
-                    className="w-full h-64 border border-gray-300 rounded"
-                  ></div>
-                </div>
-                {deliveryAddress && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Selected Address: <span className="font-medium">{deliveryAddress}</span>
-                  </p>
-                )}
-              </>
-            )}
-
             <div className="flex justify-between items-center text-lg font-bold border-t pt-4">
               <span>Total</span>
               <span className="text-blue-600">₹{total}</span>
@@ -338,15 +179,14 @@ export default function Checkout() {
 
             <button
               onClick={handleOrder}
-              disabled={!isReadyToOrder}
-              className={`w-full font-bold py-2 px-4 shadow-md transition duration-300 ${isReadyToOrder
-                ? orderbutton === "Order Placed"
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
+              disabled={orderbutton === "Order Failed"}
+              className={`w-full font-bold py-2 px-4 shadow-md transition duration-300 ${
+                orderbutton === "Order Placed"
+                  ? "bg-green-500 hover:bg-green-600 text-white"
                   : orderbutton === "Order Failed"
-                  ? 'bg-red-500 hover:bg-red-600 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
+                  ? "bg-red-500 hover:bg-red-600 text-white cursor-not-allowed"
+                  : "bg-blue-500 hover:bg-blue-600 text-white"
+              }`}
             >
               {orderbutton}
             </button>
