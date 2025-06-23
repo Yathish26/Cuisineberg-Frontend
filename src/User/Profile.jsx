@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pencil, Briefcase, Home, LogOut, MapPin, ShoppingBag, Heart, CreditCard, Settings, Plus, CheckCircle } from 'lucide-react'; // Added CheckCircle
+import { Pencil, Briefcase, Home, LogOut, MapPin, ShoppingBag, Heart, CreditCard, Settings, Plus, CheckCircle } from 'lucide-react';
 import Loading from '../Components/Loading';
 import OrderCarts from './OrderCarts';
 import Header from '../Header';
+import PasswordChange from './PasswordChange';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Profile() {
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [activeTab, setActiveTab] = useState('addresses');
+    const [activeTab, setActiveTab] = useState('orders');
+    const [theme, setTheme] = useState('');
     const [isEditing, setIsEditing] = useState(false);
-    const [editingAddressIndex, setEditingAddressIndex] = useState(null); // New state to track which address is being edited
+    const [orders, setOrders] = useState([]);
+    const [loadingOrders, setLoadingOrders] = useState(true);
     const [formData, setFormData] = useState({
         name: '',
-        email: '',
         mobileNumber: '',
-        addresses: []
     });
+    const [passChange, setPassChange] = useState(false);
     const navigate = useNavigate();
 
     const troubleShoot = () => {
@@ -26,48 +29,40 @@ export default function Profile() {
         navigate('/login');
     };
 
-    // Sample data for Indian States and Cities
-    const statesAndCities = {
-        "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore"],
-        "Arunachal Pradesh": ["Itanagar"],
-        "Assam": ["Guwahati", "Dibrugarh", "Silchar"],
-        "Bihar": ["Patna", "Gaya", "Bhagalpur"],
-        "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspaiur"],
-        "Goa": ["Panaji", "Margao"],
-        "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot"],
-        "Haryana": ["Faridabad", "Gurugram", "Panipat"],
-        "Himachal Pradesh": ["Shimla", "Dharamshala"],
-        "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad"],
-        "Karnataka": ["Bengaluru", "Mysuru", "Hubballi", "Mangaluru"],
-        "Kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode"],
-        "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur"],
-        "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik"],
-        "Manipur": ["Imphal"],
-        "Meghalaya": ["Shillong"],
-        "Mizoram": ["Aizawl"],
-        "Nagaland": ["Kohima", "Dimapur"],
-        "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela"],
-        "Punjab": ["Ludhiana", "Amritsar", "Jalandhar"],
-        "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur"],
-        "Sikkim": ["Gangtok"],
-        "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai"],
-        "Telangana": ["Hyderabad", "Warangal", "Nizamabad"],
-        "Tripura": ["Agartala"],
-        "Uttar Pradesh": ["Lucknow", "Kanpur", "Ghaziabad", "Agra", "Varanasi"],
-        "Uttarakhand": ["Dehradun", "Haridwar", "Nainital"],
-        "West Bengal": ["Kolkata", "Howrah", "Durgapur"],
-        "Andaman and Nicobar Islands": ["Port Blair"],
-        "Chandigarh": ["Chandigarh"],
-        "Dadra and Nagar Haveli and Daman and Diu": ["Daman"],
-        "Delhi": ["New Delhi"],
-        "Jammu and Kashmir": ["Srinagar", "Jammu"],
-        "Ladakh": ["Leh", "Kargil"],
-        "Lakshadweep": ["Kavaratti"],
-        "Puducherry": ["Puducherry"]
-    };
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/user/orders`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    },
+                });
+
+                const data = await res.json();
+                setOrders(data);
+            } catch (err) {
+                console.error('Failed to fetch orders:', err);
+            } finally {
+                setLoadingOrders(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
 
     useEffect(() => {
-        const token = localStorage.getItem('token'); // Fixed localStorage access
+        const dark = localStorage.getItem('appearanceisDark') === 'true';
+        if (dark) {
+            setTheme('dark');
+            document.documentElement.classList.add('dark');
+        } else {
+            setTheme('light');
+            document.documentElement.classList.remove('dark');
+        }
+    }, []);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
         if (!token) {
             troubleShoot();
             return;
@@ -94,27 +89,7 @@ export default function Profile() {
                     setUser(data);
                     setFormData({
                         name: data.name || '',
-                        email: data.email || '',
                         mobileNumber: data.mobileNumber || '',
-                        addresses: data.addresses?.length
-                            ? data.addresses.map(addr => ({
-                                doorNo: addr.doorNo || '',
-                                landmark: addr.landmark || '',
-                                type: addr.type || '',
-                                city: addr.city || '',
-                                state: addr.state || '',
-                                zipCode: addr.zipCode || '',
-                                place: addr.place || ''
-                            }))
-                            : [{
-                                doorNo: '',
-                                landmark: '',
-                                type: '',
-                                city: '',
-                                state: '',
-                                zipCode: '',
-                                place: ''
-                            }]
                     });
                 }
             } catch (err) {
@@ -133,46 +108,26 @@ export default function Profile() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleAddressChange = (e, index, field) => {
-        const updatedAddresses = [...formData.addresses];
-        updatedAddresses[index][field] = e.target.value;
+    const handleThemeToggle = () => {
+        const newTheme = theme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
 
-        if (field === 'state') {
-            updatedAddresses[index].city = '';
-        }
-        setFormData({ ...formData, addresses: updatedAddresses });
-    };
-
-    const addAddressField = () => {
-        setFormData({
-            ...formData,
-            addresses: [...formData.addresses, {
-                doorNo: '',
-                landmark: '',
-                type: '',
-                city: '',
-                state: '',
-                zipCode: '',
-                place: ''
-            }]
-        });
-        setEditingAddressIndex(formData.addresses.length); // Automatically expand the newly added address
-    };
-
-    const removeAddressField = (indexToRemove) => {
-        setFormData({
-            ...formData,
-            addresses: formData.addresses.filter((_, index) => index !== indexToRemove)
-        });
-        if (editingAddressIndex === indexToRemove) {
-            setEditingAddressIndex(null); // Collapse if the deleted address was being edited
+        if (newTheme === 'dark') {
+            localStorage.setItem('appearanceisDark', 'true');
+            document.documentElement.classList.add('dark');
+        } else {
+            localStorage.removeItem('appearanceisDark');
+            document.documentElement.classList.remove('dark');
         }
     };
 
     const handleSave = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
-        if (!token) return navigate('/login');
+        if (!token) {
+            troubleShoot();
+            return;
+        }
 
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/user/profile`, {
@@ -187,10 +142,10 @@ export default function Profile() {
             const data = await response.json();
             if (response.ok) {
                 setSuccess('Profile updated successfully!');
+                setTimeout(() => setSuccess(''), 2000);
                 setError('');
                 setUser(formData);
                 setIsEditing(false);
-                setEditingAddressIndex(null); // Exit individual address edit mode
             } else {
                 setSuccess('');
                 setError(data.message || 'Update failed');
@@ -203,71 +158,19 @@ export default function Profile() {
 
     const handleCancelEdit = () => {
         setIsEditing(false);
-        setEditingAddressIndex(null); // Exit individual address edit mode
         if (user) {
             setFormData({
                 name: user.name || '',
-                email: user.email || '',
                 mobileNumber: user.mobileNumber || '',
-                addresses: user.addresses?.length
-                    ? user.addresses.map(addr => ({
-                        doorNo: addr.doorNo || '',
-                        landmark: addr.landmark || '',
-                        type: addr.type || '',
-                        city: addr.city || '',
-                        state: addr.state || '',
-                        zipCode: addr.zipCode || '',
-                        place: addr.place || ''
-                    }))
-                    : [{
-                        doorNo: '',
-                        landmark: '',
-                        type: '',
-                        city: '',
-                        state: '',
-                        zipCode: '',
-                        place: ''
-                    }]
             });
         }
         setError('');
         setSuccess('');
     };
 
-    const getAddressIcon = (type) => {
-        switch (type?.toLowerCase()) {
-            case 'work':
-                return <Briefcase className="w-5 h-5 text-gray-600" />;
-            case 'home':
-                return <Home className="w-5 h-5 text-gray-600" />;
-            case 'hotel':
-                return <MapPin className="w-5 h-5 text-gray-600" />;
-            default:
-                return <MapPin className="w-5 h-5 text-gray-600" />;
-        }
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/login');
-    };
-
-    const formatAddress = (address) => {
-        const parts = [
-            address.doorNo,
-            address.landmark,
-            address.street,
-            address.area,
-            address.city,
-            address.state,
-            address.pincode,
-            address.country
-        ].filter(Boolean);
-
-        if (parts.length === 0 && (address.doorNo || address.landmark || address.type)) {
-            return `${address.doorNo || ''} ${address.landmark || ''} (${address.type || ''})`.trim();
-        }
-        return parts.join(', ') || 'Full address not available';
     };
 
     if (error && !isEditing) {
@@ -279,304 +182,277 @@ export default function Profile() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* <Header /> */}
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 transition-colors duration-300">
+            <Header />
+
             {/* Header Section */}
-            <div className="bg-blue-900 text-white p-6 md:p-8 shadow-md">
-                <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
-                    <div className="mb-4 md:mb-0">
-                        <h1 className="text-2xl md:text-3xl font-bold mb-1">{user.name}</h1>
-                        <p className="text-sm md:text-base text-blue-200">
-                            {user.mobileNumber || 'Not Provided'} &bull; {user.email}
-                        </p>
+            <div className="bg-gradient-to-r from-blue-700 to-blue-900 text-white p-4 md:p-8 shadow-md dark:from-gray-800 dark:to-gray-900">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex-1">
+                            <h1 className="text-2xl md:text-3xl font-bold mb-1">{user.name}</h1>
+                            <p className="text-sm md:text-base text-blue-100 dark:text-gray-300">
+                                {user.mobileNumber || 'Not Provided'} &bull; {user.email}
+                            </p>
+                        </div>
+
+                        {!isEditing ? (
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => setIsEditing(true)}
+                                    className="flex items-center px-4 py-2 bg-white/90 hover:bg-white text-blue-900 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+                                >
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Edit Profile
+                                </button>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center justify-center px-4 py-2 bg-red-500/90 hover:bg-red-600 text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+                                >
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Logout
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex flex-wrap gap-2">
+                                <button
+                                    onClick={handleCancelEdit}
+                                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSave}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 text-sm font-medium"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        )}
                     </div>
-                    {!isEditing ? (
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => setIsEditing(true)}
-                                className="flex items-center px-4 py-2 bg-white text-blue-900 shadow-lg hover:bg-gray-100 transition duration-300 ease-in-out text-sm font-semibold"
-                            >
-                                <Pencil className="w-4 h-4 mr-2" />
-                                EDIT PROFILE
-                            </button>
-                            <button 
-                            onClick={handleLogout}
-                            className="flex items-center justify-center px-4 py-2 bg-red-500 text-white shadow-lg hover:bg-red-600 transition duration-300 ease-in-out text-sm font-semibold">
-                                <LogOut className="w-4 h-4 mr-2" />
-                                Logout
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                            <button
-                                onClick={handleCancelEdit}
-                                className="flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-800 shadow-lg hover:bg-gray-400 transition duration-300 ease-in-out text-sm font-semibold"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSave}
-                                className="flex items-center justify-center px-4 py-2 bg-red-500 text-white shadow-lg hover:bg-red-600 transition duration-300 ease-in-out text-sm font-semibold"
-                            >
-                                Save Changes
-                            </button>
-                        </div>
-                    )}
                 </div>
             </div>
 
             {/* Main Content Area */}
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row mt-6 md:mt-8 gap-6 px-4 pb-8">
-                {/* Sidebar Navigation */}
-                <div className="w-full md:w-1/4 bg-white rounded-xl shadow-sm p-4 md:p-6">
-                    <ul className="space-y-2">
-                        <li className={`flex items-center p-3 rounded-lg cursor-pointer transition duration-200 ${activeTab === 'orders' ? 'bg-gray-100 text-blue-900 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setActiveTab('orders')}>
-                            <ShoppingBag className="w-5 h-5 mr-3" />
-                            Orders
-                        </li>
-                        {/* Removed Swiggy One */}
-                        <li className={`flex items-center p-3 rounded-lg cursor-pointer transition duration-200 ${activeTab === 'favourites' ? 'bg-gray-100 text-blue-900 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setActiveTab('favourites')}>
-                            <Heart className="w-5 h-5 mr-3" />
-                            Favourites
-                        </li>
-                        <li className={`flex items-center p-3 rounded-lg cursor-pointer transition duration-200 ${activeTab === 'payments' ? 'bg-gray-100 text-blue-900 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setActiveTab('payments')}>
-                            <CreditCard className="w-5 h-5 mr-3" />
-                            Payments
-                        </li>
-                        <li className={`flex items-center p-3 rounded-lg cursor-pointer transition duration-200 ${activeTab === 'addresses' ? 'bg-gray-100 text-blue-900 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setActiveTab('addresses')}>
-                            <MapPin className="w-5 h-5 mr-3" />
-                            Addresses
-                        </li>
-                        <li className={`flex items-center p-3 rounded-lg cursor-pointer transition duration-200 ${activeTab === 'settings' ? 'bg-gray-100 text-blue-900 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`} onClick={() => setActiveTab('settings')}>
-                            <Settings className="w-5 h-5 mr-3" />
-                            Settings
-                        </li>
-                    </ul>
-                </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="flex flex-col md:flex-row gap-6">
+                    {/* Sidebar Navigation */}
+                    <div className="w-full md:w-64 flex-shrink-0">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors">
+                            <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <li>
+                                    <button
+                                        onClick={() => setActiveTab('orders')}
+                                        className={`w-full flex items-center p-4 text-left transition-colors ${activeTab === 'orders'
+                                            ? 'bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-400 font-medium'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <ShoppingBag className="w-5 h-5 mr-3" />
+                                        <span>My Orders</span>
+                                        {orders.length > 0 && (
+                                            <span className="ml-auto bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs px-2 py-1 rounded-full">
+                                                {orders.length}
+                                            </span>
+                                        )}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={() => setActiveTab('payments')}
+                                        className={`w-full flex items-center p-4 text-left transition-colors ${activeTab === 'payments'
+                                            ? 'bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-400 font-medium'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <CreditCard className="w-5 h-5 mr-3" />
+                                        <span>Payments</span>
+                                    </button>
+                                </li>
+                                <li>
+                                    <button
+                                        onClick={() => setActiveTab('settings')}
+                                        className={`w-full flex items-center p-4 text-left transition-colors ${activeTab === 'settings'
+                                            ? 'bg-blue-50 dark:bg-gray-700 text-blue-700 dark:text-blue-400 font-medium'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                            }`}
+                                    >
+                                        <Settings className="w-5 h-5 mr-3" />
+                                        <span>Settings</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-                {/* Content Display Area */}
-                <div className="w-full md:w-3/4 bg-white rounded-xl shadow-sm p-4 md:p-6">
-                    {isEditing ? (
-                        // Edit mode content
-                        <div className="space-y-6">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4">Edit Your Profile</h3>
-                            {error && (
-                                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4 text-sm text-center" role="alert">
-                                    {error}
-                                </div>
-                            )}
-                            {success && (
-                                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4 text-sm text-center" role="alert">
-                                    {success}
-                                </div>
-                            )}
+                    {/* Content Display Area */}
+                    <div className="flex-1">
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden transition-colors">
+                            {isEditing ? (
+                                <div className="p-6">
+                                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-6">Edit Profile</h3>
 
-                            {/* Personal Info Edit Fields */}
-                            <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    name="name"
-                                    value={formData.name}
-                                    onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 transition duration-200"
-                                    required
-                                />
-                            </div>
+                                    {error && (
+                                        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-300">
+                                            <p>{error}</p>
+                                        </div>
+                                    )}
 
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 transition duration-200"
-                                    required
-                                />
-                            </div>
+                                    {success && (
+                                        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500 text-green-700 dark:text-green-300">
+                                            <p>{success}</p>
+                                        </div>
+                                    )}
 
-                            <div>
-                                <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                                <input
-                                    type="tel"
-                                    id="mobileNumber"
-                                    name="mobileNumber"
-                                    value={formData.mobileNumber}
-                                    onChange={handleInputChange}
-                                    className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900 transition duration-200"
-                                />
-                            </div>
+                                    <form className="space-y-6">
+                                        <div>
+                                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="name"
+                                                name="name"
+                                                value={formData.name}
+                                                onChange={handleInputChange}
+                                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-gray-900 dark:text-white"
+                                                maxLength={50}
+                                                required
+                                            />
+                                        </div>
 
-                            <label className="block text-sm font-medium text-gray-700 mb-3">Addresses</label>
-                            {formData.addresses.map((addr, index) => (
-                                <div key={index} className="bg-gray-100 p-5 rounded-lg mb-4 border border-gray-200 space-y-3 relative shadow-sm">
-                                    {editingAddressIndex === index ? (
-                                        // Expanded edit view for this specific address
-                                        <>
+                                        <div>
+                                            <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Phone Number
+                                            </label>
+                                            <input
+                                                type="tel"
+                                                id="mobileNumber"
+                                                name="mobileNumber"
+                                                value={formData.mobileNumber}
+                                                maxLength={15}
+                                                onChange={handleInputChange}
+                                                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 text-gray-900 dark:text-white"
+                                            />
+                                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                We'll only use this for order updates
+                                            </p>
+                                        </div>
+
+                                        <div className="flex justify-end gap-3 pt-4">
                                             <button
                                                 type="button"
-                                                onClick={() => setEditingAddressIndex(null)} // Collapse this address
-                                                className="absolute top-3 right-3 text-gray-500 hover:text-blue-600 transition-colors duration-200 p-1 rounded-full bg-white shadow-sm"
-                                                aria-label="Done editing address"
+                                                onClick={handleCancelEdit}
+                                                className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                                             >
-                                                <CheckCircle className="w-5 h-5" />
+                                                Cancel
                                             </button>
-                                            <input
-                                                type="text"
-                                                placeholder="Door / Flat No."
-                                                value={addr.doorNo}
-                                                onChange={(e) => handleAddressChange(e, index, 'doorNo')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Landmark"
-                                                value={addr.landmark}
-                                                onChange={(e) => handleAddressChange(e, index, 'landmark')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Type (Home / Work / Other)"
-                                                value={addr.type}
-                                                onChange={(e) => handleAddressChange(e, index, 'type')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm"
-                                            />
-
-                                            {/* State Dropdown */}
-                                            <select
-                                                value={addr.state}
-                                                onChange={(e) => handleAddressChange(e, index, 'state')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm bg-white"
+                                            <button
+                                                type="button"
+                                                onClick={handleSave}
+                                                className="px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition-colors"
                                             >
-                                                <option value="">Select State</option>
-                                                {Object.keys(statesAndCities).map((stateName) => (
-                                                    <option key={stateName} value={stateName}>{stateName}</option>
-                                                ))}
-                                            </select>
-
-                                            {/* City Dropdown */}
-                                            <select
-                                                value={addr.city}
-                                                onChange={(e) => handleAddressChange(e, index, 'city')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm bg-white"
-                                                disabled={!addr.state}
-                                            >
-                                                <option value="">Select City</option>
-                                                {addr.state && statesAndCities[addr.state]?.map((cityName) => (
-                                                    <option key={cityName} value={cityName}>{cityName}</option>
-                                                ))}
-                                            </select>
-
-                                            <input
-                                                type="text"
-                                                placeholder="Zip Code"
-                                                value={addr.zipCode}
-                                                onChange={(e) => handleAddressChange(e, index, 'zipCode')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm"
-                                            />
-                                            <input
-                                                type="text"
-                                                placeholder="Place / Locality"
-                                                value={addr.place}
-                                                onChange={(e) => handleAddressChange(e, index, 'place')}
-                                                className="w-full p-2.5 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-400 text-gray-800 text-sm"
-                                            />
-                                        </>
-                                    ) : (
-                                        // Compact view with Edit/Delete buttons for this address
-                                        <>
-                                            <div className="flex items-center mb-3">
-                                                {getAddressIcon(addr.type)}
-                                                <strong className="ml-2 text-lg text-gray-800 capitalize">{addr.type || 'Unknown'}</strong>
-                                            </div>
-                                            <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                                                {formatAddress(addr)}
-                                            </p>
-                                            <div className="flex justify-start space-x-3 mt-auto">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setEditingAddressIndex(index)} // Set this address for editing
-                                                    className="text-red-500 hover:text-red-600 text-sm font-medium transition duration-300 ease-in-out"
-                                                >
-                                                    EDIT
-                                                </button>
-                                                {formData.addresses.length > 1 && (
+                                                Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            ) : (
+                                <>
+                                    {activeTab === 'orders' && (
+                                        <OrderCarts orders={orders} loading={loadingOrders} />
+                                    )}
+                                    {activeTab === 'payments' && (
+                                        <div className="p-6 md:p-8">
+                                            <div className="text-center py-8">
+                                                <CreditCard className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+                                                <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-gray-100">Payment Methods</h3>
+                                                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                                    Your saved payment methods will appear here for faster checkout.
+                                                </p>
+                                                <div className="mt-6">
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeAddressField(index)}
-                                                        className="text-red-500 hover:text-red-600 text-sm font-medium transition duration-300 ease-in-out"
+                                                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                                     >
-                                                        DELETE
+                                                        <Plus className="-ml-1 mr-2 h-5 w-5" />
+                                                        Add Payment Method
                                                     </button>
-                                                )}
+                                                </div>
                                             </div>
-                                        </>
+                                        </div>
                                     )}
-                                </div>
-                            ))}
+                                    {activeTab === 'settings' && (
+                                        <div className="p-6 md:p-8">
+                                            <h3 className="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100 mb-6">Account Settings</h3>
 
-                            <button
-                                type="button"
-                                onClick={addAddressField}
-                                className="flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors duration-200 mt-2 px-4 py-2 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100"
-                            >
-                                <Plus className="w-4 h-4 mr-1.5" /> Add another address
-                            </button>
-                        </div>
-                    ) : (
-                        // View mode content based on activeTab
-                        <>
-                            {activeTab === 'orders' && (
-                                <OrderCarts />
-                            )}
-                            {activeTab === 'favourites' && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Favourites</h3>
-                                    <p className="text-gray-500">Your favourite items and restaurants will be listed here.</p>
-                                </div>
-                            )}
-                            {activeTab === 'payments' && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Payments</h3>
-                                    <p className="text-gray-500">Your saved payment methods will be displayed here.</p>
-                                </div>
-                            )}
-                            {activeTab === 'addresses' && (
-                                <div>
-                                    <h3 className="text-xl font-bold text-gray-800 mb-6">Your Addresses</h3>
-                                    {user.addresses && user.addresses.length > 0 ? (
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                            {user.addresses.map((address, idx) => (
-                                                <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col justify-between">
-                                                    <div>
-                                                        <div className="flex items-center mb-3">
-                                                            {getAddressIcon(address.type)}
-                                                            <strong className="ml-2 text-lg text-gray-800 capitalize">{address.type || 'Unknown'}</strong>
+                                            <div className="space-y-6">
+                                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                                    <h4 className="text-base font-medium text-gray-900 dark:text-gray-200 mb-3">Appearance</h4>
+                                                    <div className="flex items-center justify-between">
+                                                        <div>
+                                                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                                Customize how CuisineBerg looks on your device
+                                                            </p>
                                                         </div>
-                                                        <p className="text-gray-700 text-sm leading-relaxed mb-4">
-                                                            {formatAddress(address)}
-                                                        </p>
+                                                        <div className="flex items-center">
+                                                            <span className="mr-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                                {theme === 'dark' ? 'Dark' : 'Light'}
+                                                            </span>
+                                                            <button
+                                                                type="button"
+                                                                onClick={handleThemeToggle}
+                                                                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-200'}`}
+                                                            >
+                                                                <span
+                                                                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${theme === 'dark' ? 'translate-x-5' : 'translate-x-0'}`}
+                                                                />
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            ))}
+
+                                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                                    <h4 className="text-base font-medium text-gray-900 dark:text-gray-200 mb-3">Account Security</h4>
+
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="text-sm font-medium text-gray-900 dark:text-gray-200">Change Password</p>
+                                                                <p className="text-sm text-gray-500 dark:text-gray-400">Update your account password</p>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setPassChange(!passChange)}
+                                                                className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                                                            >
+                                                                Change
+                                                            </button>
+                                                        </div>
+
+                                                        {/* Password Change Form */}
+                                                        <AnimatePresence mode="wait">
+                                                            {passChange && (
+                                                                <motion.div
+                                                                    key="password-change-form"
+                                                                    initial={{ opacity: 0, y: -10 }}
+                                                                    animate={{ opacity: 1, y: 0 }}
+                                                                    exit={{ opacity: 0, y: -10 }}
+                                                                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                                                >
+                                                                    <PasswordChange />
+                                                                </motion.div>
+                                                            )}
+                                                        </AnimatePresence>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    ) : (
-                                        <p className="text-md text-gray-500 p-4 bg-gray-50 rounded-lg">No addresses found.</p>
                                     )}
-                                </div>
+                                </>
                             )}
-                            {activeTab === 'settings' && (
-                                <div className="text-center py-12">
-                                    <h3 className="text-xl font-semibold text-gray-700 mb-2">Settings</h3>
-                                    <p className="text-gray-500">Manage your account settings here.</p>
-                                </div>
-                            )}
-                        </>
-                    )}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

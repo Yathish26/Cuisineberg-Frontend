@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Header from '../Header';
+import Footer from '../Footer';
 
 export default function RetailRegister() {
     const navigate = useNavigate();
@@ -12,133 +14,115 @@ export default function RetailRegister() {
         mobileNumber: '',
         restaurantAddress: {
             street: '',
-            area: '', // Added area based on your schema
+            area: '',
             city: '',
             state: '',
             zipCode: '',
-            country: '' // Renamed from 'country' to 'country' for consistency
+            country: ''
         }
     });
 
-    // State for dropdown options
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
+    const [statesFull, setStatesFull] = useState([]);
     const [cities, setCities] = useState([]);
     const [loadingGeoData, setLoadingGeoData] = useState(false);
 
     const inputClass = "w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white";
     const labelClass = "block text-sm font-medium text-gray-700";
 
-    // Effect to fetch countries on component mount
+    // Fetch countries on mount
     useEffect(() => {
         const fetchCountries = async () => {
             setLoadingGeoData(true);
             try {
-                const response = await fetch('https://countriesnow.space/api/v0.1/countries/iso');
-                const data = await response.json();
-                if (data.error === false && data.data) {
-                    // Sort countries alphabetically for better UX
-                    const sortedCountries = data.data.map(country => country.name).sort();
+                const response = await fetch('https://raw.githubusercontent.com/mustafasolak/country_state_city/refs/heads/main/countries.json');
+                const json = await response.json();
+
+                const countriesTable = json.find(entry => entry.type === 'table' && entry.name === 'tbl_countries');
+                if (countriesTable && Array.isArray(countriesTable.data)) {
+                    const sortedCountries = countriesTable.data.sort((a, b) => a.name.localeCompare(b.name));
                     setCountries(sortedCountries);
                 } else {
-                    console.error("Error fetching countries:", data.msg);
+                    throw new Error('Countries data not found');
                 }
             } catch (error) {
                 console.error("Failed to fetch countries:", error);
-                setMessage('Failed to load countries due to network error.');
+                setMessage('Failed to load countries.');
             } finally {
                 setLoadingGeoData(false);
             }
         };
+
         fetchCountries();
     }, []);
 
-    // Effect to fetch states when country changes
+
+    // Fetch states when country changes
     useEffect(() => {
         const fetchStates = async () => {
-            const selectedCountry = formData.restaurantAddress.country;
-            if (selectedCountry) {
-                setLoadingGeoData(true);
-                setStates([]); // Clear previous states
-                setCities([]); // Clear previous cities
-                setFormData(prev => ({
-                    ...prev,
-                    restaurantAddress: {
-                        ...prev.restaurantAddress,
-                        state: '', // Reset state
-                        city: '' // Reset city
-                    }
-                }));
-                try {
-                    const response = await fetch('https://countriesnow.space/api/v0.1/countries/states', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ country: selectedCountry })
-                    });
-                    const data = await response.json();
-                    if (data.error === false && data.data && data.data.states) {
-                        // Sort states alphabetically
-                        const sortedStates = data.data.states.map(state => state.name).sort();
-                        setStates(sortedStates);
-                    } else {
-                        console.error("Error fetching states:", data.msg);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch states:", error);
-                    setMessage('Failed to load states due to network error.');
-                } finally {
-                    setLoadingGeoData(false);
-                }
-            } else {
-                setStates([]);
-                setCities([]);
+            const selectedCountryName = formData.restaurantAddress.country;
+            if (!selectedCountryName) return;
+
+            setLoadingGeoData(true);
+            setStates([]);
+            setCities([]);
+
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/mustafasolak/country_state_city/refs/heads/main/states.json');
+                const json = await response.json();
+
+                const statesTable = json.find(entry => entry.type === 'table' && entry.name === 'tbl_states');
+                if (!statesTable) throw new Error('States data not found');
+
+                const countryObj = countries.find(c => c.name === selectedCountryName);
+                if (!countryObj) throw new Error('Selected country not found');
+
+                const filteredStates = statesTable.data.filter(state => state.countryId === countryObj.id);
+                setStates(filteredStates.map(s => s.name).sort());
+                setStatesFull(filteredStates);
+            } catch (error) {
+                console.error('Failed to fetch states:', error);
+                setMessage('Failed to load states.');
+            } finally {
+                setLoadingGeoData(false);
             }
         };
-        fetchStates();
-    }, [formData.restaurantAddress.country]); // Rerun when country changes
 
-    // Effect to fetch cities when state changes
+        fetchStates();
+    }, [formData.restaurantAddress.country, countries]);
+
+    // Fetch cities when state changes
     useEffect(() => {
         const fetchCities = async () => {
-            const selectedCountry = formData.restaurantAddress.country;
-            const selectedState = formData.restaurantAddress.state;
-            if (selectedCountry && selectedState) {
-                setLoadingGeoData(true);
-                setCities([]); // Clear previous cities
-                setFormData(prev => ({
-                    ...prev,
-                    restaurantAddress: {
-                        ...prev.restaurantAddress,
-                        city: '' // Reset city
-                    }
-                }));
-                try {
-                    const response = await fetch('https://countriesnow.space/api/v0.1/countries/state/cities', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ country: selectedCountry, state: selectedState })
-                    });
-                    const data = await response.json();
-                    if (data.error === false && data.data) {
-                        // Sort cities alphabetically
-                        const sortedCities = data.data.sort();
-                        setCities(sortedCities);
-                    } else {
-                        console.error("Error fetching cities:", data.msg);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch cities:", error);
-                    setMessage('Failed to load cities due to network error.');
-                } finally {
-                    setLoadingGeoData(false);
-                }
-            } else {
-                setCities([]);
+            const selectedStateName = formData.restaurantAddress.state;
+            if (!selectedStateName) return;
+
+            setLoadingGeoData(true);
+            setCities([]);
+
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/mustafasolak/country_state_city/refs/heads/main/cities.json');
+                const json = await response.json();
+
+                const citiesTable = json.find(entry => entry.type === 'table' && entry.name === 'tbl_cities');
+                if (!citiesTable) throw new Error('Cities data not found');
+
+                const selectedStateObj = statesFull.find(state => state.name === selectedStateName);
+                if (!selectedStateObj) throw new Error('Selected state not found');
+
+                const filteredCities = citiesTable.data.filter(city => city.stateId === selectedStateObj.id);
+                setCities(filteredCities.map(c => c.name).sort());
+            } catch (error) {
+                console.error('Failed to fetch cities:', error);
+                setMessage('Failed to load cities.');
+            } finally {
+                setLoadingGeoData(false);
             }
         };
-        fetchCities();
-    }, [formData.restaurantAddress.country, formData.restaurantAddress.state]); // Rerun when country or state changes
 
+        fetchCities();
+    }, [formData.restaurantAddress.state, statesFull]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -181,8 +165,9 @@ export default function RetailRegister() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-white py-8 px-4">
-            <div className="max-w-md w-full bg-white/90 p-8 my-4 shadow-2xl rounded-lg border border-blue-100">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 via-blue-50 to-white">
+            <Header/>
+            <div className="max-w-md w-full bg-white/90 p-8 my-8 shadow-2xl rounded-lg border border-blue-100">
                 <h2 className="text-3xl font-bold text-blue-600 mb-2 text-center tracking-tight">Create Retail Account</h2>
                 <p className="text-center text-gray-500 mb-6">Join Cuisineberg and grow your business</p>
 
@@ -294,8 +279,10 @@ export default function RetailRegister() {
                                 disabled={loadingGeoData}
                             >
                                 <option value="">Select Country</option>
-                                {countries.map((countryName) => (
-                                    <option key={countryName} value={countryName}>{countryName}</option>
+                                {countries.map(country => (
+                                    <option key={country.id} value={country.name}>
+                                        {country.name}
+                                    </option>
                                 ))}
                             </select>
                             {loadingGeoData && <p className="text-blue-500 text-xs mt-1">Loading countries...</p>}
@@ -387,6 +374,7 @@ export default function RetailRegister() {
                     <Link to="/retail/login" className="text-blue-600 font-medium hover:underline">Login</Link>
                 </p>
             </div>
+            <Footer />
         </div>
     );
 }

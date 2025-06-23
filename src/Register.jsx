@@ -47,8 +47,7 @@ export default function Register() {
         setErrors(validationErrors);
 
         if (Object.keys(validationErrors).length === 0) {
-            setIsLoading(true); // Start loading
-            setMessage({ text: 'Sending OTP...', type: '' }); // Inform user
+            setIsLoading(true);
             try {
                 const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/user/send-otp`, {
                     method: 'POST',
@@ -144,153 +143,158 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 via-white to-blue-200">
-            <Header />
-            <div className="flex-1 flex items-center justify-center">
-                <div className="max-w-md w-full bg-white p-8 shadow-2xl border border-blue-100 ">
-                    <h2 className="text-3xl font-bold text-blue-600 mb-8 text-center tracking-tight">
-                        {step === 'register' ? 'Create Account' : 'Verify Your Email'}
-                    </h2>
+        <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-100 via-white to-blue-200 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800">
+    <Header />
+    <div className="flex-1 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 shadow-2xl border border-blue-100 dark:border-gray-700 rounded-lg">
+            <h2 className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-8 text-center tracking-tight">
+                {step === 'register' ? 'Create Account' : 'Verify Your Email'}
+            </h2>
 
-                    {step === 'register' && (
-                        <form onSubmit={handleSubmit} autoComplete="off">
-                            <div className="mb-6">
-                                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">
-                                    Name
-                                </label>
-                                <input
-                                    type="text"
-                                    id="name"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.name ? 'border-red-500' : 'border-gray-200'}`}
-                                    placeholder="Enter your name"
-                                    disabled={isLoading} // Disable input when loading
-                                />
-                                {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
-                            </div>
-                            <div className="mb-6">
-                                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.email ? 'border-red-500' : 'border-gray-200'}`}
-                                    placeholder="Enter your email"
-                                    disabled={isLoading} // Disable input when loading
-                                />
-                                {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
-                            </div>
-                            <div className="mb-6">
-                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
-                                    Password
-                                </label>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    value={form.password}
-                                    onChange={handleChange}
-                                    className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.password ? 'border-red-500' : 'border-gray-200'}`}
-                                    placeholder="Create a password"
-                                    disabled={isLoading} // Disable input when loading
-                                />
-                                {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
-                            </div>
+            {step === 'register' && (
+                <form onSubmit={handleSubmit} autoComplete="off">
+                    <div className="mb-6">
+                        <label htmlFor="name" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            Name
+                        </label>
+                        <input
+                            type="text"
+                            id="name"
+                            value={form.name}
+                            onChange={handleChange}
+                            maxLength={50}
+                            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${errors.name ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-gray-600'}`}
+                            placeholder="Enter your name"
+                            disabled={isLoading}
+                        />
+                        {errors.name && <span className="text-xs text-red-500 dark:text-red-400">{errors.name}</span>}
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            id="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${errors.email ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-gray-600'}`}
+                            placeholder="Enter your email"
+                            disabled={isLoading}
+                        />
+                        {errors.email && <span className="text-xs text-red-500 dark:text-red-400">{errors.email}</span>}
+                    </div>
+                    <div className="mb-6">
+                        <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            id="password"
+                            value={form.password}
+                            onChange={handleChange}
+                            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${errors.password ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-gray-600'}`}
+                            placeholder="Create a password"
+                            disabled={isLoading}
+                        />
+                        {errors.password && <span className="text-xs text-red-500 dark:text-red-400">{errors.password}</span>}
+                    </div>
 
-                            {message.text && (
-                                <div
-                                    className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-md ${message.type === 'success' ? 'text-green-700 bg-green-100 border border-green-300' : 'text-red-700 bg-red-100 border border-red-300'
-                                        }`}
-                                >
-                                    {message.text}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                className={`w-full py-3 px-4 rounded-md font-semibold shadow-lg transition duration-300 text-lg
-                                    ${isLoading
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white'
-                                    }`}
-                                disabled={isLoading} // Disable button when loading
-                            >
-                                {isLoading ? 'Processing...' : 'Register'}
-                            </button>
-                        </form>
+                    {message.text && (
+                        <div
+                            className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-md ${message.type === 'success' 
+                                ? 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700' 
+                                : 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700'
+                                }`}
+                        >
+                            {message.text}
+                        </div>
                     )}
 
-                    {step === 'verify' && (
-                        <form onSubmit={handleVerifyOtp} autoComplete="off">
-                            <p className="mb-4 text-gray-600 text-center">
-                                An OTP has been sent to <span className="font-semibold">{emailForVerification}</span>.
-                                Please enter it below to verify your email.
-                            </p>
-                            <div className="mb-6">
-                                <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 mb-1">
-                                    OTP
-                                </label>
-                                <input
-                                    type="text"
-                                    id="otp"
-                                    value={otp}
-                                    onChange={handleOtpChange}
-                                    className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${errors.otp ? 'border-red-500' : 'border-gray-200'}`}
-                                    placeholder="Enter 6-digit OTP"
-                                    maxLength="6"
-                                    disabled={isLoading} // Disable input when loading
-                                />
-                                {errors.otp && <span className="text-xs text-red-500">{errors.otp}</span>}
-                            </div>
+                    <button
+                        type="submit"
+                        className={`w-full py-3 px-4 font-semibold shadow-lg transition duration-300 text-lg rounded-md
+                            ${isLoading
+                                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Processing...' : 'Register'}
+                    </button>
+                </form>
+            )}
 
-                            {message.text && (
-                                <div
-                                    className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-md ${message.type === 'success' ? 'text-green-700 bg-green-100 border border-green-300' : 'text-red-700 bg-red-100 border border-red-300'
-                                        }`}
-                                >
-                                    {message.text}
-                                </div>
-                            )}
-
-                            <button
-                                type="submit"
-                                className={`w-full py-3 px-4 rounded-md font-semibold shadow-lg transition duration-300 text-lg
-                                    ${isLoading
-                                        ? 'bg-gray-400 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white'
-                                    }`}
-                                disabled={isLoading} // Disable button when loading
-                            >
-                                {isLoading ? 'Verifying...' : 'Verify Email'}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleResendOtp}
-                                className={`mt-4 w-full py-2 px-4 rounded-md font-semibold transition duration-300 text-sm
-                                    ${isLoading
-                                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    }`}
-                                disabled={isLoading} // Disable resend button when loading
-                            >
-                                {isLoading ? 'Sending...' : 'Resend OTP'}
-                            </button>
-                        </form>
-                    )}
-
-                    <p className="mt-6 text-sm text-gray-600 text-center">
-                        Already have an account?{' '}
-                        <Link to="/login">
-                            <span className="text-blue-500 hover:underline font-semibold cursor-pointer">
-                                Login
-                            </span>
-                        </Link>
+            {step === 'verify' && (
+                <form onSubmit={handleVerifyOtp} autoComplete="off">
+                    <p className="mb-4 text-gray-600 dark:text-gray-300 text-center">
+                        An OTP has been sent to <span className="font-semibold">{emailForVerification}</span>.
+                        Please enter it below to verify your email.
                     </p>
-                </div>
-            </div>
+                    <div className="mb-6">
+                        <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">
+                            OTP
+                        </label>
+                        <input
+                            type="text"
+                            id="otp"
+                            value={otp}
+                            onChange={handleOtpChange}
+                            className={`w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 transition bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 ${errors.otp ? 'border-red-500 dark:border-red-400' : 'border-gray-200 dark:border-gray-600'}`}
+                            placeholder="Enter 6-digit OTP"
+                            maxLength="6"
+                            disabled={isLoading}
+                        />
+                        {errors.otp && <span className="text-xs text-red-500 dark:text-red-400">{errors.otp}</span>}
+                    </div>
+
+                    {message.text && (
+                        <div
+                            className={`mb-4 text-sm font-medium text-center px-4 py-2 rounded-md ${message.type === 'success' 
+                                ? 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900 border border-green-300 dark:border-green-700' 
+                                : 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900 border border-red-300 dark:border-red-700'
+                                }`}
+                        >
+                            {message.text}
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        className={`w-full py-3 px-4 rounded-md font-semibold shadow-lg transition duration-300 text-lg
+                            ${isLoading
+                                ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                                : 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Verifying...' : 'Verify Email'}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        className={`mt-4 w-full py-2 px-4 rounded-md font-semibold transition duration-300 text-sm
+                            ${isLoading
+                                ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                            }`}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Sending...' : 'Resend OTP'}
+                    </button>
+                </form>
+            )}
+
+            <p className="mt-6 text-sm text-gray-600 dark:text-gray-400 text-center">
+                Already have an account?{' '}
+                <Link to="/login">
+                    <span className="text-blue-500 dark:text-blue-400 hover:underline font-semibold cursor-pointer">
+                        Login
+                    </span>
+                </Link>
+            </p>
         </div>
+    </div>
+</div>
     );
 }

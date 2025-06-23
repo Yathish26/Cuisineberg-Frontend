@@ -69,35 +69,22 @@ body {
 /* No specific CSSTransition for mobile cart container itself, controlled by transformY */
 
 /* Custom Scrollbar for better aesthetics */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f8f8f8;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #c0d2fb;
-  border-radius: 10px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #f6ad55;
-  /* Darker shade on hover */
-}
 
 .parent-element {
-  height: 100%; /* or any specific height */
-  overflow: auto; /* or scroll */
+  height: 100%;
+  /* or any specific height */
+  overflow: auto;
+  /* or scroll */
 }
 
 .sticky-search {
   position: sticky;
-  top: 0; /* This is crucial for sticky positioning */
-  z-index: 20; /* Ensure it's above other elements */
-  background: white; /* To ensure it's visible */
+  top: 0;
+  /* This is crucial for sticky positioning */
+  z-index: 20;
+  /* Ensure it's above other elements */
+  background: white;
+  /* To ensure it's visible */
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   border: 1px solid #e2e8f0;
@@ -108,7 +95,92 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE & Edge */
-  scrollbar-width: none;     /* Firefox */
+  -ms-overflow-style: none;
+  /* IE & Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+/* Enable smooth scrolling on hover */
+.scrolling-touch {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar styling */
+.scrolling-touch::-webkit-scrollbar {
+  height: 4px;
+}
+
+.scrolling-touch::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrolling-touch::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 2px;
+}
+
+.scrolling-touch::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Add to your global CSS */
+.no-scroll {
+  overflow: hidden !important;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+.mobile-cart-handle {
+  touch-action: none;
+  user-select: none;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 50px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 50px;
+}
+
+@keyframes drop-down {
+  0% {
+    transform: translate(-50%, -100px);
+    opacity: 0;
+  }
+
+  10% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translate(-50%, -100px);
+    opacity: 0;
+  }
+}
+
+.animate-drop-down {
+  animation: drop-down 3s ease-in-out forwards;
 }

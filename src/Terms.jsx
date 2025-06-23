@@ -103,29 +103,40 @@ export default function Terms() {
     return (
         <>
             <Header />
-            <div className="bg-white text-blue-900 min-h-screen">
-                <div className="container mx-auto px-4 py-8 md:py-12 max-w-4xl">
-                    <h1 className="text-4xl md:text-5xl font-bold text-blue-800 mb-6 text-center">Cuisineberg – Terms & Conditions</h1>
-                    <p className="text-lg text-blue-700 mb-8 text-center">Last Updated: June 7, 2025</p>
-                    <p className="text-base text-blue-700 mb-10">
+
+            <div className="bg-white dark:bg-gray-900 text-blue-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
+                <div className="container mx-auto px-4 py-10 md:py-16 max-w-4xl">
+                    <h1 className="text-4xl md:text-5xl font-bold text-blue-800 dark:text-blue-400 mb-6 text-center">
+                        Cuisineberg – Terms & Conditions
+                    </h1>
+                    <p className="text-lg text-blue-700 dark:text-blue-300 mb-8 text-center">
+                        Last Updated: June 7, 2025
+                    </p>
+                    <p className="text-base text-blue-700 dark:text-gray-300 mb-10 leading-relaxed">
                         By accessing, subscribing to, or using Cuisineberg (“Platform”), you agree to be bound by these Terms & Conditions (“Terms”). These Terms govern the relationship between Cuisineberg and Restaurants/Vendors, Clients/Customers, Agents/Partners, and Visitors/Users.
                     </p>
 
                     {sections.map((section, i) => (
                         <section key={i} className="mb-10">
-                            <h2 className="text-2xl md:text-3xl font-semibold text-blue-700 mb-4">{section.title}</h2>
+                            <h2 className="text-2xl md:text-3xl font-semibold text-blue-700 dark:text-blue-300 mb-4">
+                                {section.title}
+                            </h2>
                             {section.content.map((line, j) => (
-                                <p key={j} className="leading-relaxed mb-3">{line}</p>
+                                <p key={j} className="leading-relaxed text-blue-800 dark:text-gray-300 mb-3">
+                                    {line}
+                                </p>
                             ))}
                         </section>
                     ))}
 
-                    <p className="text-center text-blue-700 text-sm mt-12">
+                    <p className="text-center text-blue-700 dark:text-blue-400 text-sm mt-12">
                         &copy; {new Date().getFullYear()} Cuisineberg. All rights reserved.
                     </p>
                 </div>
             </div>
+
             <Footer />
         </>
+
     );
 }

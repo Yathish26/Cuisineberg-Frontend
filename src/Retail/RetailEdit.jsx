@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Loading from "../Components/Loading";
 import { useNavigate } from "react-router-dom";
-import { Armchair } from "lucide-react";
+import { Armchair, CircleCheck, Pencil, Trash2, X, Clock, MapPin, Phone, CreditCard, Globe, FileText, ChevronDown } from "lucide-react";
+import axios from "axios";
+import Header from "../Header";
+import Footer from "../Footer";
+import RetailHeader from "./RetailHeader";
+import Databank from "../Editables/Databank";
+import RetailPassChange from "./RetailPassChange";
 
 export default function RetailEdit() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -10,49 +16,59 @@ export default function RetailEdit() {
     restaurantName: "",
     restaurantAddress: {
       street: "",
-      area: "", // Added
+      area: "",
       city: "",
       state: "",
       zipCode: "",
-      googleMapsUrl: "", // Added
-      latitude: null, // Added
-      longitude: null, // Added
+      googleMapsUrl: "",
     },
+    about: "",
     mobileNumber: "",
-    alternateNumber: "", // Added
-    restaurantType: "Both", // Added with default
-    cuisines: [], // Added
-    restaurantCategory: "", // Added
-    tags: [], // Added
-    gstNumber: "", // Added
-    fssaiNumber: "", // Added
-    businessRegNumber: "", // Added
+    alternateNumber: "",
+    restaurantType: "Both",
+    restaurantCategory: "",
+    tags: [],
+    ishalal: false,
+    isjain: false,
+    gstNumber: "",
+    fssaiNumber: "",
+    businessRegNumber: "",
     operatingHours: {
-      openingTime: "", // Added
-      closingTime: "", // Added
-      workingDays: [], // Added
+      openingTime: "",
+      closingTime: "",
+      workingDays: [],
     },
-    deliveryAvailable: true, // Added with default
-    dineInAvailable: false, // Added with default
-    minOrderValue: 0, // Added with default
-    maxDeliveryRadiusKm: null, // Added
-    avgDeliveryTimeMins: null, // Added
-    websiteUrl: "", // Added
-    instagramUrl: "", // Added
-    facebookUrl: "", // Added
-    zomatoUrl: "", // Added
-    swiggyUrl: "", // Added
-    acceptedPaymentModes: [], // Added
-    upiId: "", // Added
-    bankDetails: { // Added
-      accountHolderName: "",
-      accountNumber: "",
-      ifscCode: ""
-    }
+    websiteUrl: "",
+    socialMedia: {
+      instagram: "",
+      facebook: "",
+      x: "",
+      youtube: ""
+    },
+    acceptedPaymentModes: [],
+    upiId: "",
+    cuisines: [],
+    amenities: [],
+    specialOffers: [],
+    seatingCapacity: 0,
+    takeawayAvailable: false,
+    deliveryAvailable: false,
+    reservationsAvailable: false,
+    reservationLink: "",
+    wheelchairAccessible: false,
+    healthProtocols: "",
+    latitude: 0,
+    longitude: 0
   });
-  const [editable, setEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState({ text: "", type: "" });
+  const [tagInput, setTagInput] = useState("");
+  const [cuisineInput, setCuisineInput] = useState("");
+  const [amenityInput, setAmenityInput] = useState("");
+  const [specialOfferInput, setSpecialOfferInput] = useState("");
+  const rstCategories = Databank.restaurantCategories;
+  const cuisineOptions = []
+  const amenityOptions = Databank.amenitiesList;
 
   const navigate = useNavigate();
 
@@ -60,7 +76,7 @@ export default function RetailEdit() {
     const fetchRestaurantInfo = async () => {
       const token = localStorage.getItem("retailtoken");
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/info`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/profile`, {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,30 +86,42 @@ export default function RetailEdit() {
           const data = await response.json();
           setRestaurantInfo({
             ...data,
-            // Ensure nested objects and arrays are initialized correctly if they might be null/undefined from backend
+            about: data.about || "",
             restaurantAddress: {
               street: data.restaurantAddress?.street || "",
-              area: data.restaurantAddress?.area || "", // Added
+              area: data.restaurantAddress?.area || "",
               city: data.restaurantAddress?.city || "",
               state: data.restaurantAddress?.state || "",
               zipCode: data.restaurantAddress?.zipCode || "",
-              googleMapsUrl: data.restaurantAddress?.googleMapsUrl || "", // Added
-              latitude: data.restaurantAddress?.latitude || null, // Added
-              longitude: data.restaurantAddress?.longitude || null, // Added
+              googleMapsUrl: data.restaurantAddress?.googleMapsUrl || "",
             },
             operatingHours: {
-              openingTime: data.operatingHours?.openingTime || "", // Added
-              closingTime: data.operatingHours?.closingTime || "", // Added
-              workingDays: data.operatingHours?.workingDays || [], // Added
+              openingTime: data.operatingHours?.openingTime || "",
+              closingTime: data.operatingHours?.closingTime || "",
+              workingDays: data.operatingHours?.workingDays || [],
             },
-            bankDetails: {
-              accountHolderName: data.bankDetails?.accountHolderName || "",
-              accountNumber: data.bankDetails?.accountNumber || "",
-              ifscCode: data.bankDetails?.ifscCode || ""
+            socialMedia:{
+              instagram: data.socialMedia?.instagram || "",
+              facebook: data.socialMedia?.facebook || "",
+              x: data.socialMedia?.x || "",
+              youtube: data.socialMedia?.youtube || ""
             },
-            cuisines: data.cuisines || [], // Added
-            tags: data.tags || [], // Added
-            acceptedPaymentModes: data.acceptedPaymentModes || [], // Added
+            tags: data.tags || [],
+            cuisines: data.cuisines || [],
+            amenities: data.amenities || [],
+            specialOffers: data.specialOffers || [],
+            logoUrl: data.logoUrl,
+            coverUrl: data.coverUrl,
+            acceptedPaymentModes: data.acceptedPaymentModes || [],
+            ishalal: data.ishalal || false,
+            isjain: data.isjain || false,
+            takeawayAvailable: data.takeawayAvailable || false,
+            deliveryAvailable: data.deliveryAvailable || false,
+            reservationsAvailable: data.reservationsAvailable || false,
+            wheelchairAccessible: data.wheelchairAccessible || false,
+            seatingCapacity: data.seatingCapacity || 0,
+            latitude: data.latitude || 0,
+            longitude: data.longitude || 0
           });
         } else {
           setMessage({ text: "Error fetching profile.", type: "error" });
@@ -114,9 +142,8 @@ export default function RetailEdit() {
     const { name, value, type, checked } = e.target;
 
     if (name.includes(".")) {
-      // Handle nested objects
       const [parent, child] = name.split(".");
-      if (parent === "restaurantAddress" || parent === "operatingHours" || parent === "bankDetails") {
+      if (parent === "restaurantAddress" || parent === "operatingHours" || parent === "socialMedia") {
         setRestaurantInfo((prev) => ({
           ...prev,
           [parent]: {
@@ -126,22 +153,62 @@ export default function RetailEdit() {
         }));
       }
     } else if (type === "checkbox") {
-      // Handle boolean fields
       setRestaurantInfo((prev) => ({ ...prev, [name]: checked }));
     } else if (type === "number") {
-      // Handle number fields
       setRestaurantInfo((prev) => ({ ...prev, [name]: value === "" ? null : Number(value) }));
     } else {
-      // Handle simple fields
       setRestaurantInfo((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleArrayChange = (e, fieldName) => {
-    const { value } = e.target;
-    // Split by comma and trim whitespace, then filter out empty strings
-    const newArray = value.split(',').map(item => item.trim()).filter(item => item !== '');
-    setRestaurantInfo(prev => ({ ...prev, [fieldName]: newArray }));
+  const handleKeyDown = (e, type) => {
+    if (e.key === "," || e.key === "Enter") {
+      e.preventDefault();
+      let newItem, currentItems, maxItems;
+
+      if (type === 'tag') {
+        newItem = tagInput.trim();
+        currentItems = restaurantInfo.tags;
+        maxItems = 10;
+        if (currentItems.length < maxItems && newItem && !currentItems.includes(newItem)) {
+          setRestaurantInfo(prev => ({ ...prev, tags: [...prev.tags, newItem] }));
+          setTagInput("");
+        }
+      } else if (type === 'cuisine') {
+        newItem = cuisineInput.trim();
+        currentItems = restaurantInfo.cuisines;
+        if (newItem && !currentItems.includes(newItem)) {
+          setRestaurantInfo(prev => ({ ...prev, cuisines: [...prev.cuisines, newItem] }));
+          setCuisineInput("");
+        }
+      } else if (type === 'amenity') {
+        newItem = amenityInput.trim();
+        currentItems = restaurantInfo.amenities;
+        if (newItem && !currentItems.includes(newItem)) {
+          setRestaurantInfo(prev => ({ ...prev, amenities: [...prev.amenities, newItem] }));
+          setAmenityInput("");
+        }
+      } else if (type === 'offer') {
+        newItem = specialOfferInput.trim();
+        currentItems = restaurantInfo.specialOffers;
+        if (newItem && !currentItems.includes(newItem)) {
+          setRestaurantInfo(prev => ({ ...prev, specialOffers: [...prev.specialOffers, newItem] }));
+          setSpecialOfferInput("");
+        }
+      }
+    }
+  };
+
+  const removeItem = (itemToRemove, type) => {
+    if (type === 'tag') {
+      setRestaurantInfo(prev => ({ ...prev, tags: prev.tags.filter(item => item !== itemToRemove) }));
+    } else if (type === 'cuisine') {
+      setRestaurantInfo(prev => ({ ...prev, cuisines: prev.cuisines.filter(item => item !== itemToRemove) }));
+    } else if (type === 'amenity') {
+      setRestaurantInfo(prev => ({ ...prev, amenities: prev.amenities.filter(item => item !== itemToRemove) }));
+    } else if (type === 'offer') {
+      setRestaurantInfo(prev => ({ ...prev, specialOffers: prev.specialOffers.filter(item => item !== itemToRemove) }));
+    }
   };
 
   const handleWorkingDaysChange = (e) => {
@@ -190,28 +257,40 @@ export default function RetailEdit() {
     try {
       const token = localStorage.getItem("retailtoken");
 
-      // Filter out null/empty strings for fields that might not be set
       const dataToSave = Object.fromEntries(
-        Object.entries(restaurantInfo).filter(([_, value]) => value !== null && value !== "" && !(Array.isArray(value) && value.length === 0))
+        Object.entries(restaurantInfo).filter(
+          ([_, value]) =>
+            value !== null &&
+            value !== undefined &&
+            !(Array.isArray(value) && value.length === 0)
+        )
       );
 
-      // Deep filter for nested objects if they contain only empty strings or nulls
+      // Keep blank strings so that backend can blank them out
       if (dataToSave.restaurantAddress) {
         dataToSave.restaurantAddress = Object.fromEntries(
-          Object.entries(dataToSave.restaurantAddress).filter(([_, value]) => value !== null && value !== "")
+          Object.entries(dataToSave.restaurantAddress).filter(
+            ([_, value]) => value !== null && value !== undefined
+          )
         );
       }
       if (dataToSave.operatingHours) {
         dataToSave.operatingHours = Object.fromEntries(
-          Object.entries(dataToSave.operatingHours).filter(([_, value]) => value !== null && value !== "" && !(Array.isArray(value) && value.length === 0))
+          Object.entries(dataToSave.operatingHours).filter(
+            ([_, value]) =>
+              value !== null &&
+              value !== undefined &&
+              !(Array.isArray(value) && value.length === 0)
+          )
         );
       }
       if (dataToSave.bankDetails) {
         dataToSave.bankDetails = Object.fromEntries(
-          Object.entries(dataToSave.bankDetails).filter(([_, value]) => value !== null && value !== "")
+          Object.entries(dataToSave.bankDetails).filter(
+            ([_, value]) => value !== null && value !== undefined
+          )
         );
       }
-
 
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/info`, {
         method: "PUT",
@@ -224,19 +303,21 @@ export default function RetailEdit() {
 
       if (response.ok) {
         const updatedData = await response.json();
-        // Update state with the exact data returned by the backend to ensure consistency
         setRestaurantInfo(prev => ({
-            ...prev,
-            ...updatedData,
-            restaurantAddress: { ...prev.restaurantAddress, ...updatedData.restaurantAddress },
-            operatingHours: { ...prev.operatingHours, ...updatedData.operatingHours },
-            bankDetails: { ...prev.bankDetails, ...updatedData.bankDetails },
-            cuisines: updatedData.cuisines || [],
-            tags: updatedData.tags || [],
-            acceptedPaymentModes: updatedData.acceptedPaymentModes || [],
+          ...prev,
+          ...updatedData,
+          about: updatedData.about || "",
+          restaurantAddress: { ...prev.restaurantAddress, ...updatedData.restaurantAddress },
+          operatingHours: { ...prev.operatingHours, ...updatedData.operatingHours },
+          bankDetails: { ...prev.bankDetails, ...updatedData.bankDetails },
+          tags: updatedData.tags || [],
+          cuisines: updatedData.cuisines || [],
+          amenities: updatedData.amenities || [],
+          specialOffers: updatedData.specialOffers || [],
+          acceptedPaymentModes: updatedData.acceptedPaymentModes || [],
         }));
         setMessage({ text: "Changes saved successfully.", type: "success" });
-        setEditable(false);
+        setTimeout(() => navigate("/retail"), 1000);
       } else {
         const errorData = await response.json();
         setMessage({ text: `Error: ${errorData.error || "Failed to save changes."}`, type: "error" });
@@ -247,6 +328,43 @@ export default function RetailEdit() {
     }
   };
 
+  const dummyImage = 'https://placehold.co/150x150?text=No+Image';
+
+  const logoInputRef = useRef(null);
+  const coverInputRef = useRef(null);
+
+  const uploadImage = async (file, type) => {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/upload-image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 200 && response.data.imageUrl) {
+        setRestaurantInfo((prev) => ({
+          ...prev,
+          [type]: response.data.imageUrl,
+        }));
+      }
+    } catch (err) {
+      console.error('Image upload failed:', err.message);
+      alert('Failed to upload image.');
+    }
+  };
+
+  const handleImageChange = (e, type) => {
+    const file = e.target.files[0];
+    if (file) uploadImage(file, type);
+  };
+
+  const removeImage = (type) => {
+    setRestaurantInfo((prev) => ({ ...prev, [type]: '' }));
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -255,619 +373,821 @@ export default function RetailEdit() {
   const paymentModes = ['UPI', 'Cash', 'Card', 'NetBanking', 'Other'];
   const restaurantTypes = ['Veg', 'Non-Veg', 'Both'];
 
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center py-10 px-4">
-      <div className="bg-white/90 backdrop-blur-md shadow-2xl w-full max-w-2xl p-10 rounded-lg border border-blue-100">
-        <div className="flex items-center mb-8">
-          <div className="bg-blue-100 rounded-full p-3 mr-4">
-            <Armchair color="#3b82f6" />
-          </div>
-          <h2 className="text-3xl font-bold text-blue-700 tracking-tight">Edit Restaurant Profile</h2>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <RetailHeader restaurantName={restaurantInfo.restaurantName} street={restaurantInfo.restaurantAddress.street} city={restaurantInfo.restaurantAddress.city} state={restaurantInfo.restaurantAddress.state} zipCode={restaurantInfo.restaurantAddress.zipCode} mobileNumber={restaurantInfo.mobileNumber} />
 
-        {/* Display Message */}
-        {message.text && (
-          <div
-            className={`mb-6 p-3 rounded-md text-center font-medium shadow-sm ${message.type === "success"
-                ? "bg-green-50 text-green-700 border border-green-200"
-                : "bg-red-50 text-red-700 border border-red-200"
-              }`}
+      {/* Main Container */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div className="flex items-center mb-4 md:mb-0">
+            <div className="bg-blue-100 rounded-full p-3 mr-4">
+              <Armchair className="text-blue-600" size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Restaurant Profile</h1>
+              <p className="text-gray-600">Update your restaurant details and settings</p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSaveChanges}
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg shadow-sm transition-colors flex items-center"
           >
-            {message.text}
-          </div>
-        )}
-
-        {/* Basic Info */}
-        <div className="space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Basic Information</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Owner's Name</label>
-            <input
-              type="text"
-              name="name"
-              value={restaurantInfo.name}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Enter owner's name"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={restaurantInfo.email}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Enter email"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Restaurant Name</label>
-            <input
-              type="text"
-              name="restaurantName"
-              value={restaurantInfo.restaurantName}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Enter restaurant name"
-            />
-          </div>
+            <CircleCheck className="mr-2" size={18} />
+            Save Changes
+          </button>
         </div>
 
-        {/* Restaurant Address */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Address Details</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Street</label>
-            <input
-              type="text"
-              name="restaurantAddress.street"
-              value={restaurantInfo.restaurantAddress.street}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Street address"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Area (Optional)</label>
-            <input
-              type="text"
-              name="restaurantAddress.area"
-              value={restaurantInfo.restaurantAddress.area}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Locality or Area (e.g., Kinnigoli)"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>
-              <input
-                type="text"
-                name="restaurantAddress.city"
-                value={restaurantInfo.restaurantAddress.city}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="City"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">State</label>
-              <input
-                type="text"
-                name="restaurantAddress.state"
-                value={restaurantInfo.restaurantAddress.state}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="State"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-            <input
-              type="text"
-              name="restaurantAddress.zipCode"
-              value={restaurantInfo.restaurantAddress.zipCode}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Zip code"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Google Maps URL</label>
-            <input
-              type="text"
-              name="restaurantAddress.googleMapsUrl"
-              value={restaurantInfo.restaurantAddress.googleMapsUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Google Maps URL"
-            />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Latitude</label>
-              <input
-                type="number"
-                name="restaurantAddress.latitude"
-                value={restaurantInfo.restaurantAddress.latitude || ""}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="Latitude"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Longitude</label>
-              <input
-                type="number"
-                name="restaurantAddress.longitude"
-                value={restaurantInfo.restaurantAddress.longitude || ""}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="Longitude"
-              />
-            </div>
-          </div>
-        </div>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Basic Info */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Restaurant Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="relative h-48 bg-gray-100">
+                {restaurantInfo.coverImageUrl ? (
+                  <img
+                    src={restaurantInfo.coverImageUrl}
+                    alt="Cover"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-50 to-purple-50">
+                    <span className="text-gray-400">Cover Image</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => coverInputRef.current.click()}
+                  className="absolute top-4 right-4 bg-white/90 hover:bg-white text-gray-800 p-2 rounded-full shadow-sm transition-colors"
+                >
+                  <Pencil size={16} />
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={coverInputRef}
+                  onChange={(e) => handleImageChange(e, 'coverUrl')}
+                  className="hidden"
+                />
 
-        {/* Contact Info */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Contact Information</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
-            <input
-              type="text"
-              name="mobileNumber"
-              value={restaurantInfo.mobileNumber}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Mobile number"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Alternate Number (Optional)</label>
-            <input
-              type="text"
-              name="alternateNumber"
-              value={restaurantInfo.alternateNumber}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Alternate contact number"
-            />
-          </div>
-        </div>
+                <div className="absolute -bottom-12 left-6">
+                  <div className="relative group h-24 w-24 rounded-full border-4 border-white bg-white shadow-md">
+                    <img
+                      src={restaurantInfo.logoUrl || dummyImage}
+                      alt="Logo"
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                    <button
+                      onClick={() => logoInputRef.current.click()}
+                      className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 rounded-full transition-opacity"
+                    >
+                      <Pencil className="text-white" size={16} />
+                    </button>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={logoInputRef}
+                      onChange={(e) => handleImageChange(e, 'logoUrl')}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+              </div>
 
-        {/* Restaurant Details */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Restaurant Details</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Restaurant Type</label>
-            <div className="mt-1 flex gap-4">
-              {restaurantTypes.map((type) => (
-                <label key={type} className="inline-flex items-center">
-                  <input
-                    type="radio"
-                    name="restaurantType"
-                    value={type}
-                    checked={restaurantInfo.restaurantType === type}
+              <div className="pt-16 pb-6 px-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">
+                      <input
+                        type="text"
+                        name="restaurantName"
+                        value={restaurantInfo.restaurantName}
+                        onChange={handleInputChange}
+                        className="bg-transparent border-b border-transparent focus:border-gray-300 focus:outline-none w-full max-w-md"
+                        placeholder="Restaurant Name"
+                      />
+                    </h2>
+                    <div className="mt-2 flex items-center text-sm text-gray-600">
+                      <MapPin className="mr-1" size={14} />
+                      <input
+                        type="text"
+                        name="restaurantAddress.city"
+                        value={restaurantInfo.restaurantAddress.city}
+                        onChange={handleInputChange}
+                        className="bg-transparent border-b border-transparent focus:border-gray-300 focus:outline-none w-32"
+                        placeholder="City"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    {restaurantInfo.restaurantType && (
+                      <span className={`px-2 py-1 text-xs rounded-full ${restaurantInfo.restaurantType === 'Veg' ? 'bg-green-100 text-green-800' :
+                        restaurantInfo.restaurantType === 'Non-Veg' ? 'bg-red-100 text-red-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                        {restaurantInfo.restaurantType}
+                      </span>
+                    )}
+                    {restaurantInfo.restaurantCategory && (
+                      <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
+                        {restaurantInfo.restaurantCategory}
+                      </span>
+                    )}
+                    {restaurantInfo.ishalal && (
+                      <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
+                        Halal
+                      </span>
+                    )}
+                    {restaurantInfo.isjain && (
+                      <span className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                        Jain
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={3}
+                    maxLength={500}
+                    name="about"
+                    value={restaurantInfo.about}
                     onChange={handleInputChange}
-                    disabled={!editable}
-                    className="form-radio h-4 w-4 text-blue-600"
+                    placeholder="Tell customers about your restaurant..."
                   />
-                  <span className="ml-2 text-gray-700">{type}</span>
-                </label>
-              ))}
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Cuisines (comma-separated)</label>
-            <input
-              type="text"
-              name="cuisines"
-              value={restaurantInfo.cuisines.join(', ')}
-              onChange={(e) => handleArrayChange(e, 'cuisines')}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., South Indian, Chinese, Italian"
-            />
-          </div>
+            {/* Contact & Basic Info Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <Phone className="mr-2 text-blue-600" size={18} />
+                Contact Information
+              </h3>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Restaurant Category</label>
-            <input
-              type="text"
-              name="restaurantCategory"
-              value={restaurantInfo.restaurantCategory}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., Cafe, Cloud Kitchen, Fine Dining"
-            />
-          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Owner Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={restaurantInfo.name}
+                    maxLength={15}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Tags (comma-separated)</label>
-            <input
-              type="text"
-              name="tags"
-              value={restaurantInfo.tags.join(', ')}
-              onChange={(e) => handleArrayChange(e, 'tags')}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., Fast Delivery, Family Friendly, Pet Friendly"
-            />
-          </div>
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={restaurantInfo.email}
+                    maxLength={30}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
 
-        {/* Legal & Business */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Legal & Business Information</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">GST Number</label>
-            <input
-              type="text"
-              name="gstNumber"
-              value={restaurantInfo.gstNumber}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="GST number"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">FSSAI Number</label>
-            <input
-              type="text"
-              name="fssaiNumber"
-              value={restaurantInfo.fssaiNumber}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="FSSAI license number"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Business Registration Number</label>
-            <input
-              type="text"
-              name="businessRegNumber"
-              value={restaurantInfo.businessRegNumber}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="Business registration number"
-            />
-          </div>
-        </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                  <input
+                    type="tel"
+                    name="mobileNumber"
+                    maxLength={15}
+                    value={restaurantInfo.mobileNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
 
-        {/* Operating Hours */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Operating Hours</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Opening Time</label>
-              <input
-                type="time" // Use type="time" for better user experience
-                name="operatingHours.openingTime"
-                value={restaurantInfo.operatingHours.openingTime}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Number</label>
+                  <input
+                    type="tel"
+                    name="alternateNumber"
+                    value={restaurantInfo.alternateNumber}
+                    maxLength={15}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Closing Time</label>
-              <input
-                type="time" // Use type="time" for better user experience
-                name="operatingHours.closingTime"
-                value={restaurantInfo.operatingHours.closingTime}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              />
+
+            {/* Address Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <MapPin className="mr-2 text-blue-600" size={18} />
+                Address Details
+              </h3>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
+                    <input
+                      type="text"
+                      name="restaurantAddress.street"
+                      maxLength={50}
+                      value={restaurantInfo.restaurantAddress.street}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Area</label>
+                    <input
+                      type="text"
+                      name="restaurantAddress.area"
+                      value={restaurantInfo.restaurantAddress.area}
+                      maxLength={50}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input
+                      type="text"
+                      name="restaurantAddress.city"
+                      value={restaurantInfo.restaurantAddress.city}
+                      maxLength={30}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                    <input
+                      type="text"
+                      name="restaurantAddress.state"
+                      value={restaurantInfo.restaurantAddress.state}
+                      maxLength={30}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Zip Code</label>
+                    <input
+                      type="text"
+                      name="restaurantAddress.zipCode"
+                      value={restaurantInfo.restaurantAddress.zipCode}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Latitude</label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      name="latitude"
+                      value={restaurantInfo.latitude}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Longitude</label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      name="longitude"
+                      value={restaurantInfo.longitude}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Google Maps URL</label>
+                  <input
+                    type="url"
+                    maxLength={100}
+                    name="restaurantAddress.googleMapsUrl"
+                    value={restaurantInfo.restaurantAddress.googleMapsUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Working Days</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {daysOfWeek.map((day) => (
-                <label key={day} className="inline-flex items-center">
+
+            {/* Business Details Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <FileText className="mr-2 text-blue-600" size={18} />
+                Business Information
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Restaurant Type</label>
+                  <div className="mt-1 space-y-2">
+                    {restaurantTypes.map((type) => (
+                      <label key={type} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="restaurantType"
+                          value={type}
+                          checked={restaurantInfo.restaurantType === type}
+                          onChange={handleInputChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-3 text-sm text-gray-700">{type}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label htmlFor="restaurantCategory" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                  <select
+                    id="restaurantCategory"
+                    name="restaurantCategory"
+                    value={restaurantInfo.restaurantCategory}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {rstCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                  <div className="flex flex-wrap items-center border border-gray-300 rounded-lg px-2 py-1 focus-within:ring-2 focus-within:ring-blue-500">
+                    {restaurantInfo.tags.map((tag, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center m-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeItem(tag, 'tag')}
+                          className="ml-1 text-blue-600 hover:text-red-600 focus:outline-none"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, 'tag')}
+                      className="flex-grow py-2 px-2 text-sm focus:outline-none min-w-[100px]"
+                      placeholder="Type and press comma"
+                    />
+                  </div>
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cuisines</label>
+                  <div className="flex flex-wrap items-center border border-gray-300 rounded-lg px-2 py-1 focus-within:ring-2 focus-within:ring-blue-500">
+                    {restaurantInfo.cuisines.map((cuisine, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center m-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                      >
+                        {cuisine}
+                        <button
+                          type="button"
+                          onClick={() => removeItem(cuisine, 'cuisine')}
+                          className="ml-1 text-green-600 hover:text-red-600 focus:outline-none"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    <input
+                      type="text"
+                      value={cuisineInput}
+                      onChange={(e) => setCuisineInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, 'cuisine')}
+                      className="flex-grow py-2 px-2 text-sm focus:outline-none min-w-[100px]"
+                      placeholder="Type and press comma"
+                      list="cuisineOptions"
+                    />
+                    <datalist id="cuisineOptions">
+                      {cuisineOptions.map((option, index) => (
+                        <option key={index} value={option} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Amenities</label>
+                  <div className="flex flex-wrap items-center border border-gray-300 rounded-lg px-2 py-1 focus-within:ring-2 focus-within:ring-blue-500">
+                    {restaurantInfo.amenities.map((amenity, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center m-1 px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                      >
+                        {amenity}
+                        <button
+                          type="button"
+                          onClick={() => removeItem(amenity, 'amenity')}
+                          className="ml-1 text-purple-600 hover:text-red-600 focus:outline-none"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    <input
+                      type="text"
+                      value={amenityInput}
+                      onChange={(e) => setAmenityInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, 'amenity')}
+                      className="flex-grow py-2 px-2 text-sm focus:outline-none min-w-[100px]"
+                      placeholder="Type and press comma"
+                      list="amenityOptions"
+                    />
+                    <datalist id="amenityOptions">
+                      {amenityOptions.map((option, index) => (
+                        <option key={index} value={option} />
+                      ))}
+                    </datalist>
+                  </div>
+                </div>
+
+                <div className="w-full">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Special Offers</label>
+                  <div className="flex flex-wrap items-center border border-gray-300 rounded-lg px-2 py-1 focus-within:ring-2 focus-within:ring-blue-500">
+                    {restaurantInfo.specialOffers.map((offer, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center m-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm"
+                      >
+                        {offer}
+                        <button
+                          type="button"
+                          onClick={() => removeItem(offer, 'offer')}
+                          className="ml-1 text-yellow-600 hover:text-red-600 focus:outline-none"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    <input
+                      type="text"
+                      value={specialOfferInput}
+                      onChange={(e) => setSpecialOfferInput(e.target.value)}
+                      onKeyDown={(e) => handleKeyDown(e, 'offer')}
+                      className="flex-grow py-2 px-2 text-sm focus:outline-none min-w-[100px]"
+                      placeholder="Type and press comma"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center">
                   <input
                     type="checkbox"
-                    value={day}
-                    checked={restaurantInfo.operatingHours.workingDays.includes(day)}
-                    onChange={handleWorkingDaysChange}
-                    disabled={!editable}
-                    className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                    name="ishalal"
+                    checked={restaurantInfo.ishalal}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="ml-2 text-gray-700">{day}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
+                  <label className="ml-3 text-sm text-gray-700">Halal Certified</label>
+                </div>
 
-        {/* Delivery & Logistics */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Delivery & Logistics</h3>
-          <div className="flex items-center gap-4">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="deliveryAvailable"
-                checked={restaurantInfo.deliveryAvailable}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className="form-checkbox h-5 w-5 text-blue-600 rounded"
-              />
-              <span className="ml-2 text-sm font-semibold text-gray-700">Delivery Available</span>
-            </label>
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="dineInAvailable"
-                checked={restaurantInfo.dineInAvailable}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className="form-checkbox h-5 w-5 text-blue-600 rounded"
-              />
-              <span className="ml-2 text-sm font-semibold text-gray-700">Dine-In Available</span>
-            </label>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Minimum Order Value</label>
-            <input
-              type="number"
-              name="minOrderValue"
-              value={restaurantInfo.minOrderValue}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., 50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Max Delivery Radius (Km)</label>
-            <input
-              type="number"
-              name="maxDeliveryRadiusKm"
-              value={restaurantInfo.maxDeliveryRadiusKm || ""}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., 10"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Average Delivery Time (Mins)</label>
-            <input
-              type="number"
-              name="avgDeliveryTimeMins"
-              value={restaurantInfo.avgDeliveryTimeMins || ""}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="e.g., 30"
-            />
-          </div>
-        </div>
-
-        {/* Social Media & Website */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Online Presence</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Website URL</label>
-            <input
-              type="url"
-              name="websiteUrl"
-              value={restaurantInfo.websiteUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="https://yourrestaurant.com"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Instagram URL</label>
-            <input
-              type="url"
-              name="instagramUrl"
-              value={restaurantInfo.instagramUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="https://instagram.com/yourrestaurant"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook URL</label>
-            <input
-              type="url"
-              name="facebookUrl"
-              value={restaurantInfo.facebookUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="https://facebook.com/yourrestaurant"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Zomato URL</label>
-            <input
-              type="url"
-              name="zomatoUrl"
-              value={restaurantInfo.zomatoUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="https://zomato.com/yourrestaurant"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Swiggy URL</label>
-            <input
-              type="url"
-              name="swiggyUrl"
-              value={restaurantInfo.swiggyUrl}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="https://swiggy.com/yourrestaurant"
-            />
-          </div>
-        </div>
-
-        {/* Payment Details */}
-        <div className="mt-8 space-y-5">
-          <h3 className="text-xl font-bold text-blue-600 mb-4">Payment Information</h3>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Accepted Payment Modes</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {paymentModes.map((mode) => (
-                <label key={mode} className="inline-flex items-center">
+                <div className="flex items-center">
                   <input
                     type="checkbox"
-                    value={mode}
-                    checked={restaurantInfo.acceptedPaymentModes.includes(mode)}
-                    onChange={handlePaymentModesChange}
-                    disabled={!editable}
-                    className="form-checkbox h-4 w-4 text-blue-600 rounded"
+                    name="isjain"
+                    checked={restaurantInfo.isjain}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <span className="ml-2 text-gray-700">{mode}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">UPI ID</label>
-            <input
-              type="text"
-              name="upiId"
-              value={restaurantInfo.upiId}
-              onChange={handleInputChange}
-              disabled={!editable}
-              className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-              placeholder="yourupiid@bank"
-            />
-          </div>
-          <div className="space-y-4">
-            <h4 className="text-md font-semibold text-gray-700">Bank Details</h4>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Account Holder Name</label>
-              <input
-                type="text"
-                name="bankDetails.accountHolderName"
-                value={restaurantInfo.bankDetails.accountHolderName}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="Account Holder Name"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Account Number</label>
-              <input
-                type="text"
-                name="bankDetails.accountNumber"
-                value={restaurantInfo.bankDetails.accountNumber}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="Account Number"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">IFSC Code</label>
-              <input
-                type="text"
-                name="bankDetails.ifscCode"
-                value={restaurantInfo.bankDetails.ifscCode}
-                onChange={handleInputChange}
-                disabled={!editable}
-                className={`mt-1 block w-full rounded-md border ${editable ? "border-blue-300" : "border-gray-200"
-                  } bg-white px-4 py-2 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition`}
-                placeholder="IFSC Code"
-              />
-            </div>
-          </div>
-        </div>
+                  <label className="ml-3 text-sm text-gray-700">Jain Food Available</label>
+                </div>
 
-        {/* Buttons */}
-        <div className="mt-10 flex gap-4 justify-end">
-          {editable ? (
-            <>
-              <button
-                onClick={handleSaveChanges}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-6 rounded-md shadow transition focus:outline-none focus:ring-2 focus:ring-blue-400"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={() => setEditable(false)}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-md shadow transition focus:outline-none"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setEditable(true)}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-2 px-6 rounded-md shadow transition focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              Edit Profile
-            </button>
-          )}
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="takeawayAvailable"
+                    checked={restaurantInfo.takeawayAvailable}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-3 text-sm text-gray-700">Takeaway Available</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="deliveryAvailable"
+                    checked={restaurantInfo.deliveryAvailable}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-3 text-sm text-gray-700">Delivery Available</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="reservationsAvailable"
+                    checked={restaurantInfo.reservationsAvailable}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-3 text-sm text-gray-700">Reservations Available</label>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    name="wheelchairAccessible"
+                    checked={restaurantInfo.wheelchairAccessible}
+                    onChange={handleInputChange}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label className="ml-3 text-sm text-gray-700">Wheelchair Accessible</label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Seating Capacity</label>
+                  <input
+                    type="number"
+                    name="seatingCapacity"
+                    value={restaurantInfo.seatingCapacity}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {restaurantInfo.reservationsAvailable && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Reservation Link</label>
+                    <input
+                      type="url"
+                      name="reservationLink"
+                      value={restaurantInfo.reservationLink}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Health Protocols</label>
+                  <textarea
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    rows={2}
+                    name="healthProtocols"
+                    value={restaurantInfo.healthProtocols}
+                    onChange={handleInputChange}
+                    placeholder="Describe your health and safety measures..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">GST Number</label>
+                  <input
+                    type="text"
+                    name="gstNumber"
+                    maxLength={20}
+                    value={restaurantInfo.gstNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">FSSAI Number</label>
+                  <input
+                    type="text"
+                    name="fssaiNumber"
+                    maxLength={20}
+                    value={restaurantInfo.fssaiNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Business Registration</label>
+                  <input
+                    type="text"
+                    name="businessRegNumber"
+                    maxLength={30}
+                    value={restaurantInfo.businessRegNumber}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Additional Settings */}
+          <div className="space-y-8">
+            {/* Hours Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <Clock className="mr-2 text-blue-600" size={18} />
+                Operating Hours
+              </h3>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Opening</label>
+                    <input
+                      type="time"
+                      name="operatingHours.openingTime"
+                      value={restaurantInfo.operatingHours.openingTime}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Closing</label>
+                    <input
+                      type="time"
+                      name="operatingHours.closingTime"
+                      value={restaurantInfo.operatingHours.closingTime}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Working Days</label>
+                  <div className="space-y-2">
+                    {daysOfWeek.map((day) => (
+                      <label key={day} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          value={day}
+                          checked={restaurantInfo.operatingHours.workingDays.includes(day)}
+                          onChange={handleWorkingDaysChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-3 text-sm text-gray-700">{day}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Online Presence Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <Globe className="mr-2 text-blue-600" size={18} />
+                Online Presence
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                  <input
+                    type="url"
+                    name="websiteUrl"
+                    maxLength={100}
+                    value={restaurantInfo.websiteUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                  <input
+                    type="url"
+                    name="socialMedia.instagram"
+                    maxLength={100}
+                    value={restaurantInfo.socialMedia.instagram}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Facebook</label>
+                  <input
+                    type="url"
+                    name="socialMedia.facebook"
+                    maxLength={100}
+                    value={restaurantInfo.socialMedia.facebook}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">X (formerly Twitter)</label>
+                  <input
+                    type="url"
+                    name="socialMedia.x"
+                    maxLength={100}
+                    value={restaurantInfo.socialMedia.x}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Youtube</label>
+                  <input
+                    type="url"
+                    name="socialMedia.youtube"
+                    maxLength={100}
+                    value={restaurantInfo.socialMedia.youtube}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Section */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200 flex items-center">
+                <CreditCard className="mr-2 text-blue-600" size={18} />
+                Payment Options
+              </h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Accepted Payment Methods</label>
+                  <div className="space-y-2">
+                    {paymentModes.map((mode) => (
+                      <label key={mode} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          value={mode}
+                          checked={restaurantInfo.acceptedPaymentModes.includes(mode)}
+                          onChange={handlePaymentModesChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-3 text-sm text-gray-700">{mode}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {restaurantInfo.acceptedPaymentModes.includes('UPI') && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">UPI ID (for receiving UPI payments)</label>
+                    <input
+                      type="text"
+                      name="upiId"
+                      value={restaurantInfo.upiId}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <RetailPassChange />
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Success/Error Message */}
+      {message.text && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+          <div className={`${message.type === 'success' ? 'bg-green-500' : 'bg-red-500'} text-white px-6 py-3 rounded-lg shadow-lg flex items-center animate-fade-in`}>
+            {message.type === 'success' ? (
+              <CircleCheck className="mr-2" size={20} />
+            ) : (
+              <X className="mr-2" size={20} />
+            )}
+            <span>{message.text}</span>
+          </div>
+        </div>
+      )}
+
+      <Footer />
     </div>
   );
 }
