@@ -46,30 +46,38 @@ export default function Orders({ trigger }) {
 
   useEffect(() => {
     if (restaurant && restaurant._id) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+      fetch(`${import.meta.env.VITE_API_URL}/api/cuisineberg/retail/health`)
+        .then((res) => {
+          if (!res.ok) throw new Error('Server not ready');
 
-      const socket = io(import.meta.env.VITE_API_URL, {
-        auth: {
-          token: localStorage.getItem('retailtoken'),
-        },
-      });
+          if (socketRef.current) {
+            socketRef.current.disconnect();
+          }
 
-      socketRef.current = socket;
+          const socket = io(import.meta.env.VITE_API_URL, {
+            auth: {
+              token: localStorage.getItem('retailtoken'),
+            },
+          });
 
-      socket.on('connect', () => {
-        socket.emit('joinRoom', { restaurantId: restaurant._id.toString() });
-      });
+          socketRef.current = socket;
 
-      socket.on('connect_error', (err) => {
-        console.error('❌ Socket connect error:', err.message);
-      });
+          socket.on('connect', () => {
+            socket.emit('joinRoom', { restaurantId: restaurant._id.toString() });
+          });
 
-      socket.on('newOrder', (newOrder) => {
-        setOrders(prev => [newOrder, ...prev]);
-        playSound('/alert.mp3');
-      });
+          socket.on('connect_error', (err) => {
+            console.warn('Socket connection failed:', err.message);
+          });
+
+          socket.on('newOrder', (newOrder) => {
+            setOrders(prev => [newOrder, ...prev]);
+            playSound('/alert.mp3');
+          });
+        })
+        .catch((err) => {
+          console.warn('Skipping socket connection:', err.message);
+        });
 
       return () => {
         if (socketRef.current) {

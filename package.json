@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -13,6 +13,7 @@
     "@cashfreepayments/cashfree-js": "^1.0.5",
     "@cashfreepayments/pg-react": "^1.0.3",
     "@hugeicons/react": "^1.0.5",
+    "@yudiel/react-qr-scanner": "^2.3.1",
     "axios": "^1.9.0",
     "framer-motion": "^12.18.1",
     "lucide-react": "^0.511.0",

@@ -27,6 +27,8 @@ import AdminFeedback from "./Admin/AdminFeedback";
 import Restaurant from "./Restaurant";
 import ReviewForm from "./Review";
 import AdminSettings from "./Admin/AdminSettings";
+import DineIn from "./DineIn";
+import RetailTable from "./Retail/RetailTable";
 
 function App() {
   useEffect(() => {
@@ -43,6 +45,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/explore" element={<Order />} />
+          <Route path="/dinein" element={<DineIn />} />
           <Route path="/order/:slug" element={<UserOrder />} />
           <Route path='/admin' element={<Admin />} />
           <Route path='/admin/login' element={<AdminLogin />} />
@@ -54,6 +57,7 @@ function App() {
           <Route path='/retail/login' element={<RetailLogin />} />
           <Route path='/retail/register' element={<RetailRegister />} />
           <Route path='/retail' element={<Retail />} />
+          <Route path='/retail/table' element={<RetailTable />} />
           <Route path='/retail/profile' element={<RetailProfile />} />
           <Route path='/retail/edit' element={<RetailEdit />} />
           <Route path='/review/:publicCode' element={<ReviewForm />} />

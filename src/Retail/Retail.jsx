@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../Components/Loading';
 import Orders from './Orders';
-import { ArrowUp, Search, X, Pencil, ClipboardList, IndianRupee, Plus, ShoppingBag, Star, Trash2, AlertTriangle, Minus } from 'lucide-react';
+import { ArrowUp, Search, X, Pencil, ClipboardList, IndianRupee, Plus, ShoppingBag, Star, Trash2, AlertTriangle, Minus, ConciergeBell } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import RetailHeader from './RetailHeader';
 import { FiAlertTriangle } from 'react-icons/fi';
 import Databank from '../Editables/Databank';
+import PhotoUpload from '../Components/PhotoUpload';
+import PhotoURLPicker from '../Components/PhotoURLPicker';
 
 export default function Retail() {
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -530,6 +532,11 @@ export default function Retail() {
     });
     const [ingredientInput, setIngredientInput] = useState('');
     const [tagInput, setTagInput] = useState('');
+    const [editAdditional, setEditAdditional] = useState(false);
+
+    const toggleEditAdditional = () => {
+      setEditAdditional(!editAdditional);
+    };
 
     // For photo library selection
     const setEditItemPhoto = (url) => setEditFields(f => ({ ...f, photoURL: url }));
@@ -587,7 +594,7 @@ export default function Retail() {
     };
 
     return (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+      <div onClick={handleCancelEdit} className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
         <div
           className="bg-white rounded-xl max-h-[90vh] overflow-y-auto shadow-xl p-6 w-full max-w-md transform transition-all duration-300 ease-out"
           onClick={(e) => e.stopPropagation()}
@@ -630,21 +637,12 @@ export default function Retail() {
               </div>
             </div>
             {/* Photo URL */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
-              <input
-                type="url"
-                value={editFields.photoURL}
-                onChange={e => setEditFields(f => ({ ...f, photoURL: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              />
-              <button
-                onClick={() => setIsPhotoLibraryOpen(true)}
-                className="mt-2 w-full flex items-center justify-center space-x-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium py-2.5 px-4 rounded-lg border border-gray-300 transition-colors"
-              >
-                <span>Select from Library</span>
-              </button>
-            </div>
+            <PhotoURLPicker
+              editFields={editFields}
+              setEditFields={setEditFields}
+              setIsPhotoLibraryOpen={setIsPhotoLibraryOpen}
+            />
+
             {/* Food Category */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Category*</label>
@@ -661,7 +659,7 @@ export default function Retail() {
               </select>
             </div>
             {/* Food Type */}
-            <div>
+            <div className='mt-4 border-b border-gray-200 pb-4'>
               <label className="block text-sm font-medium text-gray-700 mb-2">Food Type*</label>
               <div className="flex flex-wrap gap-4">
                 <label className="inline-flex items-center">
@@ -699,457 +697,469 @@ export default function Retail() {
                 </label>
               </div>
             </div>
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-              <textarea
-                value={editFields.description}
-                onChange={e => setEditFields(f => ({ ...f, description: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                rows={3}
-              />
+            <div className="border-b border-gray-200 pb-4">
+              <div
+                className="flex items-center justify-between cursor-pointer py-2"
+                onClick={toggleEditAdditional}
+              >
+                <h3 className="text-lg font-medium text-gray-800">Additional Information</h3>
+                {editAdditional ? <Minus className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+              </div>
             </div>
-            {/* Ingredients */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {editFields.ingredients?.map((ingredient, index) => (
-                  <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
-                    <span className="text-sm">{ingredient}</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const updated = [...editFields.ingredients];
-                        updated.splice(index, 1);
-                        setEditFields(f => ({ ...f, ingredients: updated }));
-                      }}
-                      className="ml-1 text-gray-500 hover:text-red-500"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+            {editAdditional &&
+              <div className='flex flex-col gap-4'>
+                {/* Description */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    value={editFields.description}
+                    onChange={e => setEditFields(f => ({ ...f, description: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    rows={3}
+                  />
+                </div>
+                {/* Ingredients */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Ingredients</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {editFields.ingredients?.map((ingredient, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span className="text-sm">{ingredient}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = [...editFields.ingredients];
+                            updated.splice(index, 1);
+                            setEditFields(f => ({ ...f, ingredients: updated }));
+                          }}
+                          className="ml-1 text-gray-500 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={ingredientInput}
-                  onChange={e => setIngredientInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && ingredientInput.trim()) {
-                      setEditFields(f => ({
-                        ...f,
-                        ingredients: [...(f.ingredients || []), ingredientInput.trim()]
-                      }));
-                      setIngredientInput('');
-                    }
-                  }}
-                  placeholder="Add ingredient and press Enter"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (ingredientInput.trim()) {
-                      setEditFields(f => ({
-                        ...f,
-                        ingredients: [...(f.ingredients || []), ingredientInput.trim()]
-                      }));
-                      setIngredientInput('');
-                    }
-                  }}
-                  className="px-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-            {/* Preparation Time */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Prep Time</label>
-              <input
-                type="text"
-                value={editFields.preparationTime}
-                onChange={e => setEditFields(f => ({ ...f, preparationTime: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              />
-            </div>
-            {/* Nutritional Info */}
-            <div>
-              <h4 className="text-md font-medium text-gray-800 mb-3">Nutritional Information</h4>
-              <div className="grid grid-cols-2 gap-4">
-                {['calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium'].map((field) => (
-                  <div key={field}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{field}</label>
+                  <div className="flex">
                     <input
-                      type="number"
-                      value={editFields.nutritionalInfo?.[field] || ''}
-                      onChange={e => setEditFields(f => ({
-                        ...f,
-                        nutritionalInfo: { ...f.nutritionalInfo, [field]: e.target.value }
-                      }))}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-            {/* Allergens */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Allergens</label>
-              <div className="flex flex-wrap gap-2">
-                {['Gluten', 'Dairy', 'Nuts', 'Soy', 'Eggs', 'Fish', 'Shellfish'].map((allergen) => {
-                  const isSelected = editFields.allergens?.includes(allergen);
-                  return (
-                    <button
-                      key={allergen}
-                      type="button"
-                      onClick={() => {
-                        const current = Array.isArray(editFields.allergens) ? editFields.allergens : [];
-                        const updated = isSelected
-                          ? current.filter(a => a !== allergen)
-                          : [...current, allergen];
-                        setEditFields(f => ({ ...f, allergens: updated }));
-                      }}
-                      className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
-                        ? 'bg-red-500 text-white border-red-500'
-                        : 'bg-white text-gray-700 border-gray-300'
-                        } hover:bg-red-100 transition`}
-                    >
-                      {allergen}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            {/* Cuisine */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine</label>
-              <input
-                type="text"
-                value={editFields.cuisine}
-                onChange={e => setEditFields(f => ({ ...f, cuisine: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-              />
-            </div>
-            {/* Dietary Restrictions */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dietary Restrictions</label>
-              <div className="flex flex-wrap gap-2">
-                {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Halal', 'Kosher'].map((restriction) => (
-                  <label key={restriction} className="inline-flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={editFields.dietaryRestrictions?.includes(restriction) || false}
-                      onChange={e => {
-                        const current = editFields.dietaryRestrictions || [];
-                        if (e.target.checked) {
+                      type="text"
+                      value={ingredientInput}
+                      onChange={e => setIngredientInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && ingredientInput.trim()) {
                           setEditFields(f => ({
                             ...f,
-                            dietaryRestrictions: [...current, restriction]
+                            ingredients: [...(f.ingredients || []), ingredientInput.trim()]
                           }));
-                        } else {
-                          setEditFields(f => ({
-                            ...f,
-                            dietaryRestrictions: current.filter(r => r !== restriction)
-                          }));
+                          setIngredientInput('');
                         }
                       }}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      placeholder="Add ingredient and press Enter"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                     />
-                    <span className="ml-2 text-sm text-gray-700">{restriction}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            {/* Availability */}
-            <div>
-              <h4 className="text-md font-medium text-gray-800 mb-3">Availability</h4>
-              <div className="grid grid-cols-2 gap-4">
-                {/* Days Selector */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Days</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
-                      const isSelected = editFields.availability?.days?.includes(day);
-                      return (
-                        <button
-                          key={day}
-                          type="button"
-                          onClick={() => {
-                            const current = editFields.availability?.days || [];
-                            const updated = isSelected
-                              ? current.filter(d => d !== day)
-                              : [...current, day];
-                            setEditFields(f => ({
-                              ...f,
-                              availability: { ...f.availability, days: updated }
-                            }));
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white text-gray-700 border-gray-300'
-                            } hover:bg-blue-100 transition`}
-                        >
-                          {day}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {/* Time Slots Selector */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Time Slots</label>
-                  <div className="flex flex-wrap gap-2">
-                    {['Breakfast', 'Lunch', 'Dinner', 'All Day'].map((time) => {
-                      const isSelected = editFields.availability?.times?.includes(time);
-                      return (
-                        <button
-                          key={time}
-                          type="button"
-                          onClick={() => {
-                            const current = editFields.availability?.times || [];
-                            const updated = isSelected
-                              ? current.filter(t => t !== time)
-                              : [...current, time];
-                            setEditFields(f => ({
-                              ...f,
-                              availability: { ...f.availability, times: updated }
-                            }));
-                          }}
-                          className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
-                            ? 'bg-blue-500 text-white border-blue-500'
-                            : 'bg-white text-gray-700 border-gray-300'
-                            } hover:bg-blue-100 transition`}
-                        >
-                          {time}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            </div>
-            {/* Tags */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {editFields.tags?.map((tag, index) => (
-                  <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
-                    <span className="text-sm">{tag}</span>
                     <button
                       type="button"
                       onClick={() => {
-                        const updated = [...editFields.tags];
-                        updated.splice(index, 1);
-                        setEditFields(f => ({ ...f, tags: updated }));
+                        if (ingredientInput.trim()) {
+                          setEditFields(f => ({
+                            ...f,
+                            ingredients: [...(f.ingredients || []), ingredientInput.trim()]
+                          }));
+                          setIngredientInput('');
+                        }
                       }}
-                      className="ml-1 text-gray-500 hover:text-red-500"
+                      className="px-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      Add
                     </button>
                   </div>
-                ))}
-              </div>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={e => {
-                    if (e.key === 'Enter' && tagInput.trim()) {
-                      setEditFields(f => ({
-                        ...f,
-                        tags: [...(f.tags || []), tagInput.trim()]
-                      }));
-                      setTagInput('');
-                    }
-                  }}
-                  placeholder="Add tag and press Enter"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (tagInput.trim()) {
-                      setEditFields(f => ({
-                        ...f,
-                        tags: [...(f.tags || []), tagInput.trim()]
-                      }));
-                      setTagInput('');
-                    }
-                  }}
-                  className="px-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
-                >
-                  Add
-                </button>
-              </div>
-            </div>
-            {/* Special Instructions */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
-              <textarea
-                value={editFields.specialInstructions}
-                onChange={e => setEditFields(f => ({ ...f, specialInstructions: e.target.value }))}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                rows={2}
-                placeholder="e.g. Contains nuts, Spicy level options"
-              />
-            </div>
-            {/* Options */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-3">Options</h3>
-              {editFields.options?.map((option, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 mb-3">
-                  <div className="grid grid-cols-2 gap-4 mb-3">
+                </div>
+                {/* Preparation Time */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Prep Time</label>
+                  <input
+                    type="text"
+                    value={editFields.preparationTime}
+                    onChange={e => setEditFields(f => ({ ...f, preparationTime: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  />
+                </div>
+                {/* Nutritional Info */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-800 mb-3">Nutritional Information</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {['calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium'].map((field) => (
+                      <div key={field}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">{field}</label>
+                        <input
+                          type="number"
+                          value={editFields.nutritionalInfo?.[field] || ''}
+                          onChange={e => setEditFields(f => ({
+                            ...f,
+                            nutritionalInfo: { ...f.nutritionalInfo, [field]: e.target.value }
+                          }))}
+                          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* Allergens */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Allergens</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Gluten', 'Dairy', 'Nuts', 'Soy', 'Eggs', 'Fish', 'Shellfish'].map((allergen) => {
+                      const isSelected = editFields.allergens?.includes(allergen);
+                      return (
+                        <button
+                          key={allergen}
+                          type="button"
+                          onClick={() => {
+                            const current = Array.isArray(editFields.allergens) ? editFields.allergens : [];
+                            const updated = isSelected
+                              ? current.filter(a => a !== allergen)
+                              : [...current, allergen];
+                            setEditFields(f => ({ ...f, allergens: updated }));
+                          }}
+                          className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
+                            ? 'bg-red-500 text-white border-red-500'
+                            : 'bg-white text-gray-700 border-gray-300'
+                            } hover:bg-red-100 transition`}
+                        >
+                          {allergen}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                {/* Cuisine */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cuisine</label>
+                  <input
+                    type="text"
+                    value={editFields.cuisine}
+                    onChange={e => setEditFields(f => ({ ...f, cuisine: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  />
+                </div>
+                {/* Dietary Restrictions */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dietary Restrictions</label>
+                  <div className="flex flex-wrap gap-2">
+                    {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Halal', 'Kosher'].map((restriction) => (
+                      <label key={restriction} className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={editFields.dietaryRestrictions?.includes(restriction) || false}
+                          onChange={e => {
+                            const current = editFields.dietaryRestrictions || [];
+                            if (e.target.checked) {
+                              setEditFields(f => ({
+                                ...f,
+                                dietaryRestrictions: [...current, restriction]
+                              }));
+                            } else {
+                              setEditFields(f => ({
+                                ...f,
+                                dietaryRestrictions: current.filter(r => r !== restriction)
+                              }));
+                            }
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">{restriction}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                {/* Availability */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-800 mb-3">Availability</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Days Selector */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Option Name*</label>
-                      <input
-                        type="text"
-                        value={option.name}
-                        onChange={e => {
-                          const updated = [...editFields.options];
-                          updated[index].name = e.target.value;
-                          setEditFields(f => ({ ...f, options: updated }));
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                        required
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Days</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+                          const isSelected = editFields.availability?.days?.includes(day);
+                          return (
+                            <button
+                              key={day}
+                              type="button"
+                              onClick={() => {
+                                const current = editFields.availability?.days || [];
+                                const updated = isSelected
+                                  ? current.filter(d => d !== day)
+                                  : [...current, day];
+                                setEditFields(f => ({
+                                  ...f,
+                                  availability: { ...f.availability, days: updated }
+                                }));
+                              }}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
+                                ? 'bg-blue-500 text-white border-blue-500'
+                                : 'bg-white text-gray-700 border-gray-300'
+                                } hover:bg-blue-100 transition`}
+                            >
+                              {day}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
+                    {/* Time Slots Selector */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
-                      <input
-                        type="number"
-                        value={option.price}
-                        onChange={e => {
-                          const updated = [...editFields.options];
-                          updated[index].price = e.target.value;
-                          setEditFields(f => ({ ...f, options: updated }));
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Time Slots</label>
+                      <div className="flex flex-wrap gap-2">
+                        {['Breakfast', 'Lunch', 'Dinner', 'All Day'].map((time) => {
+                          const isSelected = editFields.availability?.times?.includes(time);
+                          return (
+                            <button
+                              key={time}
+                              type="button"
+                              onClick={() => {
+                                const current = editFields.availability?.times || [];
+                                const updated = isSelected
+                                  ? current.filter(t => t !== time)
+                                  : [...current, time];
+                                setEditFields(f => ({
+                                  ...f,
+                                  availability: { ...f.availability, times: updated }
+                                }));
+                              }}
+                              className={`px-3 py-1.5 rounded-full text-sm font-medium border ${isSelected
+                                ? 'bg-blue-500 text-white border-blue-500'
+                                : 'bg-white text-gray-700 border-gray-300'
+                                } hover:bg-blue-100 transition`}
+                            >
+                              {time}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
-                  <div className="mb-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={option.description || ''}
-                      onChange={e => {
-                        const updated = [...editFields.options];
-                        updated[index].description = e.target.value;
-                        setEditFields(f => ({ ...f, options: updated }));
+                </div>
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {editFields.tags?.map((tag, index) => (
+                      <div key={index} className="bg-gray-100 px-3 py-1 rounded-full flex items-center">
+                        <span className="text-sm">{tag}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = [...editFields.tags];
+                            updated.splice(index, 1);
+                            setEditFields(f => ({ ...f, tags: updated }));
+                          }}
+                          className="ml-1 text-gray-500 hover:text-red-500"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex">
+                    <input
+                      type="text"
+                      value={tagInput}
+                      onChange={e => setTagInput(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && tagInput.trim()) {
+                          setEditFields(f => ({
+                            ...f,
+                            tags: [...(f.tags || []), tagInput.trim()]
+                          }));
+                          setTagInput('');
+                        }
                       }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                      rows={2}
+                      placeholder="Add tag and press Enter"
+                      className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                     />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (tagInput.trim()) {
+                          setEditFields(f => ({
+                            ...f,
+                            tags: [...(f.tags || []), tagInput.trim()]
+                          }));
+                          setTagInput('');
+                        }
+                      }}
+                      className="px-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Add
+                    </button>
                   </div>
+                </div>
+                {/* Special Instructions */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions</label>
+                  <textarea
+                    value={editFields.specialInstructions}
+                    onChange={e => setEditFields(f => ({ ...f, specialInstructions: e.target.value }))}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                    rows={2}
+                    placeholder="e.g. Contains nuts, Spicy level options"
+                  />
+                </div>
+                {/* Options */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-3">Options</h3>
+                  {editFields.options?.map((option, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 mb-3">
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Option Name*</label>
+                          <input
+                            type="text"
+                            value={option.name}
+                            onChange={e => {
+                              const updated = [...editFields.options];
+                              updated[index].name = e.target.value;
+                              setEditFields(f => ({ ...f, options: updated }));
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
+                          <input
+                            type="number"
+                            value={option.price}
+                            onChange={e => {
+                              const updated = [...editFields.options];
+                              updated[index].price = e.target.value;
+                              setEditFields(f => ({ ...f, options: updated }));
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          value={option.description || ''}
+                          onChange={e => {
+                            const updated = [...editFields.options];
+                            updated[index].description = e.target.value;
+                            setEditFields(f => ({ ...f, options: updated }));
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                          rows={2}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = [...editFields.options];
+                          updated.splice(index, 1);
+                          setEditFields(f => ({ ...f, options: updated }));
+                        }}
+                        className="text-sm text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Remove Option
+                      </button>
+                    </div>
+                  ))}
                   <button
                     type="button"
                     onClick={() => {
-                      const updated = [...editFields.options];
-                      updated.splice(index, 1);
-                      setEditFields(f => ({ ...f, options: updated }));
+                      setEditFields(f => ({
+                        ...f,
+                        options: [...(f.options || []), { name: '', price: '', description: '' }]
+                      }));
                     }}
-                    className="text-sm text-red-600 hover:text-red-800 transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center"
                   >
-                    Remove Option
+                    <Plus className="w-4 h-4 mr-1" /> Add Option
                   </button>
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setEditFields(f => ({
-                    ...f,
-                    options: [...(f.options || []), { name: '', price: '', description: '' }]
-                  }));
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-1" /> Add Option
-              </button>
-            </div>
-            {/* Add-ons */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-3">Add-ons</h3>
-              {editFields.addOns?.map((addOn, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 mb-3">
-                  <div className="grid grid-cols-2 gap-4 mb-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Add-on Name*</label>
-                      <input
-                        type="text"
-                        value={addOn.name}
-                        onChange={e => {
+                {/* Add-ons */}
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-3">Add-ons</h3>
+                  {editFields.addOns?.map((addOn, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4 mb-3">
+                      <div className="grid grid-cols-2 gap-4 mb-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Add-on Name*</label>
+                          <input
+                            type="text"
+                            value={addOn.name}
+                            onChange={e => {
+                              const updated = [...editFields.addOns];
+                              updated[index].name = e.target.value;
+                              setEditFields(f => ({ ...f, addOns: updated }));
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
+                          <input
+                            type="number"
+                            value={addOn.price}
+                            onChange={e => {
+                              const updated = [...editFields.addOns];
+                              updated[index].price = e.target.value;
+                              setEditFields(f => ({ ...f, addOns: updated }));
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          value={addOn.description || ''}
+                          onChange={e => {
+                            const updated = [...editFields.addOns];
+                            updated[index].description = e.target.value;
+                            setEditFields(f => ({ ...f, addOns: updated }));
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                          rows={2}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
                           const updated = [...editFields.addOns];
-                          updated[index].name = e.target.value;
+                          updated.splice(index, 1);
                           setEditFields(f => ({ ...f, addOns: updated }));
                         }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                        required
-                      />
+                        className="text-sm text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Remove Add-on
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Price*</label>
-                      <input
-                        type="number"
-                        value={addOn.price}
-                        onChange={e => {
-                          const updated = [...editFields.addOns];
-                          updated[index].price = e.target.value;
-                          setEditFields(f => ({ ...f, addOns: updated }));
-                        }}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                        min="0"
-                        step="0.01"
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={addOn.description || ''}
-                      onChange={e => {
-                        const updated = [...editFields.addOns];
-                        updated[index].description = e.target.value;
-                        setEditFields(f => ({ ...f, addOns: updated }));
-                      }}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                      rows={2}
-                    />
-                  </div>
+                  ))}
                   <button
                     type="button"
                     onClick={() => {
-                      const updated = [...editFields.addOns];
-                      updated.splice(index, 1);
-                      setEditFields(f => ({ ...f, addOns: updated }));
+                      setEditFields(f => ({
+                        ...f,
+                        addOns: [...(f.addOns || []), { name: '', price: '', description: '' }]
+                      }));
                     }}
-                    className="text-sm text-red-600 hover:text-red-800 transition-colors"
+                    className="text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center"
                   >
-                    Remove Add-on
+                    <Plus className="w-4 h-4 mr-1" /> Add Add-on
                   </button>
                 </div>
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  setEditFields(f => ({
-                    ...f,
-                    addOns: [...(f.addOns || []), { name: '', price: '', description: '' }]
-                  }));
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 transition-colors flex items-center"
-              >
-                <Plus className="w-4 h-4 mr-1" /> Add Add-on
-              </button>
-            </div>
+              </div>}
           </div>
-          <div className="mt-8 flex justify-end space-x-3">
+          <div className="mt-8 flex justify-end space-x-3 sticky bottom-0 bg-white py-4">
             <button
               onClick={handleCancelEdit}
               className="px-5 py-2.5 text-gray-700 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
@@ -1228,14 +1238,14 @@ export default function Retail() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl cursor-pointer shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Customer Rating</h3>
-                <p className="mt-1 text-3xl font-semibold text-gray-900">4.8</p>
+                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Take an Order</h3>
+                <p className="mt-1 text-3xl font-semibold text-gray-900">Order</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-lg">
-                <Star className="h-6 w-6 text-purple-600" />
+                <ConciergeBell className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -1414,17 +1424,8 @@ export default function Retail() {
                     </div>
                   </div>
 
-                  {/* Photo URL */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
-                    <input
-                      type="url"
-                      placeholder="https://example.com/image.jpg"
-                      value={newItem.photoURL}
-                      onChange={(e) => setNewItem({ ...newItem, photoURL: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                    />
-                  </div>
+                  {/* Photo Upload or Library */}
+                  <PhotoUpload setNewItem={setNewItem} newItem={newItem} setIsPhotoLibraryOpen={setIsPhotoLibraryOpen} />
 
                   {/* Food Category */}
                   <div className="mb-4">

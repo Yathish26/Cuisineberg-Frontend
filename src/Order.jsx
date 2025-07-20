@@ -53,7 +53,7 @@ export default function Order() {
                             placeholder="Search restaurants, cuisines, or dishes..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full p-3 sm:p-4 pl-12 sm:pl-14 border-0 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200 dark:focus:ring-zinc-700 bg-white/90 dark:bg-zinc-900/90 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-gray-900 dark:text-gray-100 text-base sm:text-lg transition"
+                            className="w-full p-3 sm:p-4 pl-12 sm:pl-14 rounded-xl border-0 shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-200 dark:focus:ring-zinc-700 bg-white/90 dark:bg-zinc-900/90 placeholder:text-gray-400 dark:placeholder:text-zinc-500 text-gray-900 dark:text-gray-100 text-base sm:text-lg transition"
                         />
                         <span className="absolute left-4 sm:left-5 top-1/2 transform -translate-y-1/2 text-blue-400">
                             <Search size={20} />
@@ -97,7 +97,7 @@ export default function Order() {
                                     onClick={() =>
                                         navigate(`/order/${r.name.toLowerCase().replace(/\s+/g, '-')}-${r.publicCode || r.id}`)
                                     }
-                                    className="bg-gradient-to-br from-white/90 via-[#ecf2ff] to-[#dbeafe] dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 border-0 cursor-pointer p-4 sm:p-6 shadow-xl hover:shadow-2xl transition group relative overflow-hidden"
+                                    className="bg-gradient-to-br from-white/90 via-[#ecf2ff] to-[#dbeafe] dark:from-zinc-800 border-0 cursor-pointer rounded-xl p-4 sm:p-6 shadow-xl hover:shadow-2xl transition group relative overflow-hidden"
                                 >
                                     <div className="flex items-center gap-3 sm:gap-4">
                                         <div className="bg-blue-100 dark:bg-zinc-700 rounded-full p-3 sm:p-4 group-hover:bg-blue-200 dark:group-hover:bg-zinc-600 transition shadow">

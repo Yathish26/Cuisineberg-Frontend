@@ -249,8 +249,8 @@ export default function UserOrder() {
                             </div>
 
                             {/* Search Bar */}
-                            <div className="sticky top-4 z-20 bg-white dark:bg-gray-700 shadow-md flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-gray-200 dark:border-gray-600 focus-within:ring-2 focus-within:ring-blue-300 dark:focus-within:ring-blue-500 transition-all duration-300">
-                                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-300 mr-2 sm:mr-3" />
+                            <div className="sticky top-4 z-20 rounded-xl bg-white dark:bg-gray-700 shadow-md flex items-center px-3 py-2 sm:px-4 sm:py-3 border border-gray-200 dark:border-gray-600 focus-within:ring-2 focus-within:ring-blue-300 dark:focus-within:ring-blue-500 transition-all duration-300">
+                                <Search className="w-4 h-4 sm:w-5 sm:h-5  text-gray-400 dark:text-gray-300 mr-2 sm:mr-3" />
                                 <input
                                     type="text"
                                     placeholder="Search for delicious dishes..."
@@ -292,7 +292,7 @@ export default function UserOrder() {
                             </div>
 
                             {/* Menu Categories */}
-                            <div className="w-full overflow-hidden relative"> {/* Added relative for positioning arrow */}
+                            <div className="w-full  overflow-hidden relative"> {/* Added relative for positioning arrow */}
                                 <div className="overflow-x-auto scrollbar-hide">
                                     <div className="flex gap-3 pr-20 whitespace-nowrap w-max">
                                         {[...new Set(
@@ -345,7 +345,7 @@ export default function UserOrder() {
                                                 {grouped[category].map(item => (
                                                     <div
                                                         key={item._id}
-                                                        className={`flex flex-col w-full bg-white dark:bg-gray-700 p-4 sm:p-5 border border-gray-100 dark:border-gray-600 shadow-lg hover:shadow-xl dark:hover:shadow-gray-600/30 transform hover:-translate-y-1 transition-all duration-300 ease-in-out
+                                                        className={`flex flex-col rounded-xl w-full bg-white dark:bg-gray-700 p-4 sm:p-5 border border-gray-100 dark:border-gray-600 shadow-lg hover:shadow-xl dark:hover:shadow-gray-600/30 transform hover:-translate-y-1 transition-all duration-300 ease-in-out
                 ${itemAddedAnimation === item._id ? 'ring-2 ring-blue-400 dark:ring-blue-500' : ''}`}
                                                     >
                                                         {item.photoURL ? (
@@ -353,7 +353,7 @@ export default function UserOrder() {
                                                                 src={item.photoURL}
                                                                 draggable="false"
                                                                 alt={item.itemName}
-                                                                className="w-full h-36 sm:h-40 xl:h-48 object-contain cursor-pointer bg-gray-50 dark:bg-gray-600 shadow-sm mb-3 sm:mb-4"
+                                                                className="w-full h-36  sm:h-40 xl:h-48 object-contain cursor-pointer bg-gray-50 dark:bg-gray-600 shadow-sm mb-3 sm:mb-4"
                                                                 onError={(e) => { e.target.onerror = null; e.target.src = `https://placehold.co/400x200/FEEBC8/DD6B20?text=No+Image`; }}
                                                                 onClick={() => setSelectedImage({ url: item.photoURL, alt: item.itemName })}
                                                             />

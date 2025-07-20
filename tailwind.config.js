@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'mo': {max: '640px'},
+      },
       fontFamily: {
         spartan: ['"League Spartan"', 'sans-serif'],
       },

@@ -55,7 +55,7 @@ export default function Header() {
                 {/* Left: Logo */}
                 <div
                     onClick={() => navigate("/")}
-                    className="flex items-center space-x-3 cursor-pointer"
+                    className="flex items-center space-x-3 mo:w-12 mo:h-12 cursor-pointer"
                 >
                     <Svg icon="sidelogo" />
                 </div>
